@@ -4,36 +4,12 @@ document.body.appendChild(highlighterPopup);
 const setMarkerPosition = (markerPosition) =>
     highlighterPopup.setAttribute("markerPosition", JSON.stringify(markerPosition));
 
-chrome.storage.local.get(
-    [
-        "startOffset",
-        "endOffset",
-        "startNodeData",
-        "startNodeHTML",
-        "startNodeTagName",
-        "endNodeData",
-        "endNodeHTML",
-        "endNodeTagName",
-    ],
-    (res) => {
-        // if (res.saveNode && res.startOffset &&) {
-        console.log(res);
-        // highlighterPopup.highlightRange(res.test);
-        let range = buildRange(
-            res.startOffset,
-            res.endOffset,
-            res.startNodeData,
-            res.startNodeHTML,
-            res.startNodeTagName,
-            res.endNodeData,
-            res.endNodeHTML,
-            res.endNodeTagName
-        );
-        console.log(range);
-        highlighterPopup.highlightRange(range);
-        // }
-    }
-);
+chrome.storage.local.get(["rInfo"], (res) => {
+    console.log(res);
+    let range = buildRange(res.rInfo);
+    console.log(range);
+    highlighterPopup.highlightRange(range);
+});
 
 const getSelectedText = () => window.getSelection().toString();
 
@@ -59,59 +35,50 @@ function getMarkerPosition() {
     };
 }
 
-function buildRange(
+function buildRange({
+    startNode,
+    startIsText,
     startOffset,
+    startTagName,
+    startHTML,
+    endNode,
+    endIsText,
     endOffset,
-    startNodeData,
-    startNodeHTML,
-    startNodeTagName,
-    endNodeData,
-    endNodeHTML,
-    endNodeTagName
-) {
-    var startTagList = document.getElementsByTagName(startNodeTagName);
-    var endTagList = document.getElementsByTagName(endNodeTagName);
-    console.log(startTagList);
-
-    // find the parent elements with the same innerHTML
-    var startFoundElement = null;
-    for (var i = 0; i < startTagList.length; i++) {
-        if (startTagList[i].innerHTML == startNodeHTML) {
-            console.log(startTagList[i]);
-            startFoundElement = startTagList[i];
+    endTagName,
+    endHTML,
+}) {
+    let sP = findEle(startTagName, startHTML);
+    let eP = findEle(endTagName, endHTML);
+    console.log(sP);
+    console.log(eP);
+    var s, e;
+    if (startIsText) {
+        let childs = sP.childNodes;
+        for (let i = 0; i < childs.length; i++) {
+            if (childs[i].nodeType == 3 && childs[i].nodeValue == startNode) s = childs[i];
         }
+    } else {
+        s = sP;
     }
-    var endFoundElement = null;
-    for (var i = 0; i < endTagList.length; i++) {
-        if (endTagList[i].innerHTML == endNodeHTML) {
-            endFoundElement = endTagList[i];
+    if (endIsText) {
+        let childs = eP.childNodes;
+        for (let i = 0; i < childs.length; i++) {
+            if (childs[i].nodeType == 3 && childs[i].nodeValue == endNode) e = childs[i];
         }
+    } else {
+        e = eP;
     }
-    console.log(startFoundElement);
-    console.log(endFoundElement);
-
-    // find the nodes within the elements by comparing node data
-    var startNodeList = startFoundElement.childNodes;
-    var startFoundNode = null;
-    for (var i = 0; i < startNodeList.length; i++) {
-        if (startNodeList[i].data == startNodeData) {
-            startFoundNode = startNodeList[i];
-            console.log(startFoundNode);
-        }
-    }
-    var endNodeList = endFoundElement.childNodes;
-    var endFoundNode = null;
-    for (var i = 0; i < endNodeList.length; i++) {
-        if (endNodeList[i].data == endNodeData) {
-            endFoundNode = endNodeList[i];
-            console.log(endFoundNode);
-        }
-    }
-
-    // create the range
-    var range = document.createRange();
-
-    range.setStart(startFoundNode, startOffset);
-    range.setEnd(endFoundNode, endOffset);
+    let range = document.createRange();
+    range.setStart(s, startOffset);
+    range.setEnd(e, endOffset);
     return range;
+}
+
+function findEle(tagName, innerHTML) {
+    let list = document.getElementsByTagName(tagName);
+    for (let i = 0; i < list.length; i++) {
+        if (list[i].innerHTML == innerHTML) {
+            return list[i];
+        }
+    }
 }

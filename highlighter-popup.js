@@ -74,30 +74,55 @@ class HighlighterPopup extends HTMLElement {
     highlightSelection() {
         var userSelection = window.getSelection();
         for (let i = 0; i < userSelection.rangeCount; i++) {
-            console.log(userSelection.toString());
             let range = userSelection.getRangeAt(i);
+            console.log(range);
 
-            //save range data
-            var startContainer = range.startContainer;
-            var endContainer = range.endContainer;
-            var startOffset = range.startOffset; // where the range starts
-            var endOffset = range.endOffset; // where the range ends
-            var startNodeData = startContainer.data; // the actual selected text
-            var startNodeHTML = startContainer.parentElement.innerHTML; // parent element innerHTML
-            var startNodeTagName = startContainer.parentElement.tagName; // parent element tag name
-            var endNodeData = endContainer.data; // the actual selected text
-            var endNodeHTML = endContainer.parentElement.innerHTML; // parent element innerHTML
-            var endNodeTagName = endContainer.parentElement.tagName; // parent element tag name
+            let startNode = range.startContainer;
+            let endNode = range.endContainer;
+
+            if (startNode.nodeType == 3) {
+                var startIsText = true;
+                var startFlag = startNode.parentNode;
+                startNode = startNode.nodeValue;
+            } else {
+                var startIsText = false;
+                var startFlag = startNode;
+            }
+            if (endNode.nodeType == 3) {
+                var endIsText = true;
+                var endFlag = endNode.parentNode;
+                endNode = endNode.nodeValue;
+            } else {
+                var endIsText = false;
+                var endFlag = endNode;
+            }
+
+            let startOffset = range.startOffset;
+            let endOffset = range.endOffset;
+
+            let startTagName = startFlag.nodeName;
+            let startHTML = startFlag.innerHTML;
+
+            let endTagName = endFlag.nodeName;
+            let endHTML = endFlag.innerHTML;
+
+            let rInfo = {
+                startNode: startNode,
+                startOffset: startOffset,
+                startIsText: startIsText,
+                startTagName: startTagName,
+                startHTML: startHTML,
+
+                endNode: endNode,
+                endOffset: endOffset,
+                endIsText: endIsText,
+                endTagName: endTagName,
+                endHTML: endHTML,
+            };
+
             chrome.storage.local.set(
                 {
-                    startOffset,
-                    endOffset,
-                    startNodeData,
-                    startNodeTagName,
-                    startNodeHTML,
-                    endNodeData,
-                    endNodeHTML,
-                    endNodeTagName,
+                    rInfo,
                 },
                 () => {
                     this.highlightRange(range);
