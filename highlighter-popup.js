@@ -120,21 +120,37 @@ class HighlighterPopup extends HTMLElement {
                 endHTML: endHTML,
             };
 
-            chrome.storage.local.set(
-                {
-                    rInfo,
-                },
-                () => {
-                    this.highlightRange(range);
-                }
-            );
+            this.saveHighlight(rInfo, "a", "#121212").then(() => {
+                this.highlightRange(range);
+            });
         }
     }
 
-    highlightRange(range) {
+    highlightRange(range, category, color) {
         const clone = this.highlightTemplate.cloneNode(true).content.firstElementChild;
         clone.appendChild(range.extractContents());
         range.insertNode(clone);
+    }
+
+    saveHighlight(rInfo, category, color) {
+        return new Promise((resolve) => {
+            chrome.storage.local.get(["pages"], (res) => {
+                let index = res.pages.findIndex((el) => el.url === window.location.href);
+                if (index >= 0) {
+                    res.pages[index].highlights.push({ category, color, rInfo });
+                } else {
+                    res.pages.push({ url: window.location.href, highlights: [{ category, color, rInfo }] });
+                }
+                chrome.storage.local.set(
+                    {
+                        pages: res.pages,
+                    },
+                    () => {
+                        resolve();
+                    }
+                );
+            });
+        });
     }
 }
 

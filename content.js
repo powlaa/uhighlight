@@ -4,11 +4,17 @@ document.body.appendChild(highlighterPopup);
 const setMarkerPosition = (markerPosition) =>
     highlighterPopup.setAttribute("markerPosition", JSON.stringify(markerPosition));
 
-chrome.storage.local.get(["rInfo"], (res) => {
+chrome.storage.local.get(["pages"], (res) => {
     console.log(res);
-    let range = buildRange(res.rInfo);
-    console.log(range);
-    highlighterPopup.highlightRange(range);
+    let index = res.pages.findIndex((el) => el.url === window.location.href);
+    console.log(index);
+    if (index >= 0) {
+        res.pages[index].highlights.forEach((highlight) => {
+            let range = buildRange(highlight.rInfo);
+            highlighterPopup.highlightRange(range, highlight.category, highlight.color);
+            console.log(range);
+        });
+    }
 });
 
 const getSelectedText = () => window.getSelection().toString();

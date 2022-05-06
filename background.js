@@ -1,6 +1,6 @@
 chrome.runtime.onInstalled.addListener((details) => {
     chrome.storage.local.set({
-        shows: [],
+        pages: [],
     });
     chrome.contextMenus.create({
         title: "Highlight text",
