@@ -1,19 +1,25 @@
 const highlighterPopup = document.createElement("highlighter-popup");
 document.body.appendChild(highlighterPopup);
+const categoriesMenu = document.createElement("categories-menu");
+document.body.appendChild(categoriesMenu);
+categoriesMenu.addEventListener("updateActiveCategories", (evt) => {
+    //TODO: get all categories
+    //TODO: show only evt.detail.activeCategories
+});
 
 const setMarkerPosition = (markerPosition) =>
     highlighterPopup.setAttribute("markerPosition", JSON.stringify(markerPosition));
 
 chrome.storage.local.get(["pages"], (res) => {
-    console.log(res);
     let index = res.pages.findIndex((el) => el.url === window.location.href);
-    console.log(index);
     if (index >= 0) {
         res.pages[index].highlights.forEach((highlight) => {
             let range = buildRange(highlight.rInfo);
             highlighterPopup.highlightRange(range, highlight.category, highlight.color);
-            console.log(range);
         });
+
+        let uniqueCategories = [...new Set(res.pages[index].highlights.map((el) => el.category))];
+        categoriesMenu.setAttribute("categories", JSON.stringify(uniqueCategories));
     }
 });
 

@@ -120,13 +120,19 @@ class HighlighterPopup extends HTMLElement {
                 endHTML: endHTML,
             };
 
-            this.saveHighlight(rInfo, "a", "#121212").then(() => {
+            var testCategories = ["Apples", "Bananas", "Pears"];
+
+            var randomItem = testCategories[Math.floor(Math.random() * testCategories.length)];
+
+            this.saveHighlight(rInfo, randomItem, "#121212").then(() => {
                 this.highlightRange(range);
+                //TODO: let parent know to update categories
             });
         }
     }
 
     highlightRange(range, category, color) {
+        //TODO: add uhighlight-<category> as classto the span
         const clone = this.highlightTemplate.cloneNode(true).content.firstElementChild;
         clone.appendChild(range.extractContents());
         range.insertNode(clone);
