@@ -58,7 +58,7 @@ class CategoriesMenu extends HTMLElement {
         categories.forEach((category) => {
             let categoriesTmpl = this.getCategoryTemplate(category);
             this.categoriesMenu.appendChild(categoriesTmpl.content.cloneNode(true));
-            this.shadowRoot.getElementById(category).addEventListener("click", this.categoryClicked);
+            this.shadowRoot.getElementById(category).addEventListener("change", this.categoryClicked.bind(this));
         });
     }
 
@@ -68,7 +68,10 @@ class CategoriesMenu extends HTMLElement {
         categoryTmpl.innerHTML = `
             <style>
             </style>
-            <div id="${name}" class="active">${name}</div>
+            <div>
+                <input id="${name}" class="active" type="checkbox" name="${name}" checked>
+                <label for="${name}">${name}</label>
+            </div>
         `;
         return categoryTmpl;
     }
@@ -76,7 +79,7 @@ class CategoriesMenu extends HTMLElement {
     categoryClicked(evt) {
         if (evt.target.classList.contains("active")) {
             evt.target.classList.remove("active");
-            this.activeCategories = this.activeCategories.filter((el) => el === evt.target.id);
+            this.activeCategories = this.activeCategories.filter((el) => el !== evt.target.id);
         } else {
             evt.target.classList.add("active");
             this.activeCategories.push(evt.target.id);

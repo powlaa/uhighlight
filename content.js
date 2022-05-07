@@ -3,6 +3,7 @@ document.body.appendChild(highlighterPopup);
 const categoriesMenu = document.createElement("categories-menu");
 document.body.appendChild(categoriesMenu);
 categoriesMenu.addEventListener("updateActiveCategories", (evt) => {
+    console.log(evt.detail);
     //TODO: get all categories
     //TODO: show only evt.detail.activeCategories
 });
