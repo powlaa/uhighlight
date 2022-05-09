@@ -41,11 +41,12 @@ class CategoriesMenu extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "categories") {
-            console.log(oldValue + " " + newValue);
             this.activeCategories = JSON.parse(newValue);
             if (this.activeCategories.length > 0) {
                 this.categoriesMenu.style.display = "block";
                 this.renderCategories(this.activeCategories);
+            } else {
+                this.categoriesMenu.style.display = "none";
             }
         }
     }

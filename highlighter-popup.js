@@ -2,7 +2,7 @@ const highlightColor = "rgb(213, 234, 255)";
 
 const template = `
     <template id="highlightTemplate">
-        <span class="highlight" style="background-color: ${highlightColor}; display: inline"></span>
+        <span class="uhighlight" style="background-color: ${highlightColor}; display: inline"><button class="uhighlight-delete-btn">X</button></span>
     </template>
     <button id="highlighterPopup">
         <svg class="text-marker" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 544 512"><path d="M0 479.98L99.92 512l35.45-35.45-67.04-67.04L0 479.98zm124.61-240.01a36.592 36.592 0 0 0-10.79 38.1l13.05 42.83-50.93 50.94 96.23 96.23 50.86-50.86 42.74 13.08c13.73 4.2 28.65-.01 38.15-10.78l35.55-41.64-173.34-173.34-41.52 35.44zm403.31-160.7l-63.2-63.2c-20.49-20.49-53.38-21.52-75.12-2.35L190.55 183.68l169.77 169.78L530.27 154.4c19.18-21.74 18.15-54.63-2.35-75.13z"></path></svg>
@@ -123,17 +123,21 @@ class HighlighterPopup extends HTMLElement {
             var testCategories = ["Apples", "Bananas", "Pears"];
 
             var randomCategory = testCategories[Math.floor(Math.random() * testCategories.length)];
-
-            this.saveHighlight(rInfo, randomCategory, "#121212").then(() => {
-                this.highlightRange(range, randomCategory, "#121212", true);
+            var id = Date.now();
+            this.saveHighlight(id, rInfo, randomCategory, "#121212").then(() => {
+                this.highlightRange(range, id, randomCategory, "#121212", true);
             });
         }
     }
 
-    highlightRange(range, category, color, notify) {
+    highlightRange(range, id, category, color, notify) {
         const clone = this.highlightTemplate.cloneNode(true).content.firstElementChild;
         clone.classList.add("uhighlight-" + category);
         clone.appendChild(range.extractContents());
+        clone.id = "uhighlight-" + id;
+        clone
+            .getElementsByClassName("uhighlight-delete-btn")[0]
+            .addEventListener("click", this.highlightClicked.bind(this));
         range.insertNode(clone);
 
         this.addCategory(category, notify);
@@ -162,14 +166,14 @@ class HighlighterPopup extends HTMLElement {
         });
     }
 
-    saveHighlight(rInfo, category, color) {
+    saveHighlight(id, rInfo, category, color) {
         return new Promise((resolve) => {
             chrome.storage.local.get(["pages"], (res) => {
                 let index = res.pages.findIndex((el) => el.url === window.location.href);
                 if (index >= 0) {
-                    res.pages[index].highlights.push({ category, color, rInfo });
+                    res.pages[index].highlights.push({ id, category, color, rInfo });
                 } else {
-                    res.pages.push({ url: window.location.href, highlights: [{ category, color, rInfo }] });
+                    res.pages.push({ url: window.location.href, highlights: [{ id, category, color, rInfo }] });
                 }
                 chrome.storage.local.set(
                     {
@@ -180,6 +184,37 @@ class HighlighterPopup extends HTMLElement {
                     }
                 );
             });
+        });
+    }
+
+    highlightClicked(evt) {
+        this.deleteHighlight(evt.target.parentElement);
+    }
+
+    deleteHighlight(element) {
+        let id = parseInt(element.id.substring(11));
+        //remove delete button
+        element.removeChild(element.childNodes[0]);
+        element.outerHTML = element.innerHTML;
+
+        //delete from storage
+        chrome.storage.local.get(["pages"], (res) => {
+            let index = res.pages.findIndex((el) => el.url === window.location.href);
+            if (index >= 0) {
+                res.pages[index].highlights = res.pages[index].highlights.filter((el) => el.id !== id);
+
+                this.categories = [...new Set(res.pages[index].highlights.map((el) => el.category))];
+                this.dispatchEvent(new CustomEvent("updateCategories", { detail: { categories: this.categories } }));
+                if (res.pages[index].highlights.length > 0) {
+                    chrome.storage.local.set({
+                        pages: res.pages,
+                    });
+                } else {
+                    chrome.storage.local.set({
+                        pages: res.pages.filter((page) => page.url !== window.location.href),
+                    });
+                }
+            }
         });
     }
 }

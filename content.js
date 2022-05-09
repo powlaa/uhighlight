@@ -21,7 +21,7 @@ chrome.storage.local.get(["pages"], (res) => {
     if (index >= 0) {
         res.pages[index].highlights.forEach((highlight) => {
             let range = buildRange(highlight.rInfo);
-            highlighterPopup.highlightRange(range, highlight.category, highlight.color, false);
+            highlighterPopup.highlightRange(range, highlight.id, highlight.category, highlight.color, false);
         });
 
         categories = [...new Set(res.pages[index].highlights.map((el) => el.category))];
@@ -67,8 +67,6 @@ function buildRange({
 }) {
     let sP = findEle(startTagName, startHTML);
     let eP = findEle(endTagName, endHTML);
-    console.log(sP);
-    console.log(eP);
     var s, e;
     if (startIsText) {
         let childs = sP.childNodes;
