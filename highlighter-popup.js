@@ -1,12 +1,21 @@
-const highlightColor = "rgb(213, 234, 255)";
+let highlightColor = "rgb(213, 234, 255)";
+const colors = {
+    color0: "#9CD4BB",
+    color1: "#B6B297",
+    color2: "#C4AED4",
+    color3: "#F3CD8E",
+};
 
 const template = `
     <template id="highlightTemplate">
         <span class="uhighlight" style="background-color: ${highlightColor}; display: inline"><button class="uhighlight-delete-btn">X</button></span>
     </template>
-    <button id="highlighterPopup">
-        <svg class="text-marker" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 544 512"><path d="M0 479.98L99.92 512l35.45-35.45-67.04-67.04L0 479.98zm124.61-240.01a36.592 36.592 0 0 0-10.79 38.1l13.05 42.83-50.93 50.94 96.23 96.23 50.86-50.86 42.74 13.08c13.73 4.2 28.65-.01 38.15-10.78l35.55-41.64-173.34-173.34-41.52 35.44zm403.31-160.7l-63.2-63.2c-20.49-20.49-53.38-21.52-75.12-2.35L190.55 183.68l169.77 169.78L530.27 154.4c19.18-21.74 18.15-54.63-2.35-75.13z"></path></svg>
-    </button>
+    <div id="highlighterPopup">
+        <button class="color-btn" id="color0"></button>
+        <button class="color-btn" id="color1"></button>
+        <button class="color-btn" id="color2"></button>
+        <button class="color-btn" id="color3"></button>
+    </div>
 `;
 
 const styled = ({ display = "none", left = 0, top = 0 }) => `
@@ -22,8 +31,25 @@ const styled = ({ display = "none", left = 0, top = 0 }) => `
         padding: 5px 10px;
         position: fixed;
         top: ${top}px;
-        width: 40px;
         z-index: 9999;
+    }
+    .color-btn {
+        border-radius: 10px;
+        border: none;
+        width: 20px;
+        height: 20px;
+    }
+    #color0 {
+        background-color: ${colors.color0}
+    }
+    #color1 {
+        background-color: ${colors.color1}
+    }
+    #color2 {
+        background-color: ${colors.color2}
+    }
+    #color3 {
+        background-color: ${colors.color3}
     }
     .text-marker {
         fill: white;
@@ -62,7 +88,9 @@ class HighlighterPopup extends HTMLElement {
         style.textContent = styled({});
         this.shadowRoot.appendChild(style);
         this.shadowRoot.innerHTML += template;
-        this.shadowRoot.getElementById("highlighterPopup").addEventListener("click", () => this.highlightSelection());
+        this.shadowRoot
+            .getElementById("highlighterPopup")
+            .childNodes.forEach((btn) => btn.addEventListener("click", () => this.highlightSelection(btn.id)));
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -71,7 +99,7 @@ class HighlighterPopup extends HTMLElement {
         }
     }
 
-    highlightSelection() {
+    highlightSelection(color) {
         var userSelection = window.getSelection();
         for (let i = 0; i < userSelection.rangeCount; i++) {
             let range = userSelection.getRangeAt(i);
@@ -124,15 +152,18 @@ class HighlighterPopup extends HTMLElement {
 
             var randomCategory = testCategories[Math.floor(Math.random() * testCategories.length)];
             var id = Date.now();
-            this.saveHighlight(id, rInfo, randomCategory, "#121212").then(() => {
-                this.highlightRange(range, id, randomCategory, "#121212", true);
+            this.saveHighlight(id, rInfo, randomCategory, colors[color]).then(() => {
+                this.highlightRange(range, id, randomCategory, colors[color], true);
             });
         }
     }
 
     highlightRange(range, id, category, color, notify) {
+        if (!color) highlightColor = color;
+        else highlightColor = color;
         const clone = this.highlightTemplate.cloneNode(true).content.firstElementChild;
         clone.classList.add("uhighlight-" + category);
+        clone.style.backgroundColor = color;
         clone.appendChild(range.extractContents());
         clone.id = "uhighlight-" + id;
         clone
