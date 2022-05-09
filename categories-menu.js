@@ -29,10 +29,6 @@ class CategoriesMenu extends HTMLElement {
         this.render();
     }
 
-    get highlightTemplate() {
-        return this.shadowRoot.getElementById("highlightTemplate");
-    }
-
     static get observedAttributes() {
         return ["categories"];
     }
@@ -55,6 +51,7 @@ class CategoriesMenu extends HTMLElement {
     }
 
     renderCategories(categories) {
+        this.categoriesMenu.textContent = "";
         categories.forEach((category) => {
             let categoriesTmpl = this.getCategoryTemplate(category);
             this.categoriesMenu.appendChild(categoriesTmpl.content.cloneNode(true));
@@ -63,7 +60,6 @@ class CategoriesMenu extends HTMLElement {
     }
 
     getCategoryTemplate(name) {
-        //TODO: Add checkboxes
         let categoryTmpl = document.createElement("template");
         categoryTmpl.innerHTML = `
             <style>

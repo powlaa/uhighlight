@@ -1,3 +1,6 @@
 body {
     /* background-color: palegreen !important; */
 }
+.uhighlight-hidden {
+    background-color: rgba(0, 0, 0, 0) !important;
+}

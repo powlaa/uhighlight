@@ -1,26 +1,31 @@
 const highlighterPopup = document.createElement("highlighter-popup");
 document.body.appendChild(highlighterPopup);
+highlighterPopup.addEventListener("updateCategories", (evt) => {
+    categories = evt.detail.categories;
+    categoriesMenu.setAttribute("categories", JSON.stringify(categories));
+});
+
 const categoriesMenu = document.createElement("categories-menu");
 document.body.appendChild(categoriesMenu);
 categoriesMenu.addEventListener("updateActiveCategories", (evt) => {
-    console.log(evt.detail);
-    //TODO: get all categories
-    //TODO: show only evt.detail.activeCategories
+    highlighterPopup.updateVisibleCategories(evt.detail.activeCategories);
 });
 
 const setMarkerPosition = (markerPosition) =>
     highlighterPopup.setAttribute("markerPosition", JSON.stringify(markerPosition));
+
+let categories = [];
 
 chrome.storage.local.get(["pages"], (res) => {
     let index = res.pages.findIndex((el) => el.url === window.location.href);
     if (index >= 0) {
         res.pages[index].highlights.forEach((highlight) => {
             let range = buildRange(highlight.rInfo);
-            highlighterPopup.highlightRange(range, highlight.category, highlight.color);
+            highlighterPopup.highlightRange(range, highlight.category, highlight.color, false);
         });
 
-        let uniqueCategories = [...new Set(res.pages[index].highlights.map((el) => el.category))];
-        categoriesMenu.setAttribute("categories", JSON.stringify(uniqueCategories));
+        categories = [...new Set(res.pages[index].highlights.map((el) => el.category))];
+        categoriesMenu.setAttribute("categories", JSON.stringify(categories));
     }
 });
 
