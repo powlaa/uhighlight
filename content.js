@@ -47,9 +47,9 @@ function getMarkerPosition() {
     const rangeBounds = window.getSelection().getRangeAt(0).getBoundingClientRect();
     return {
         // Substract width of marker button -> 40px / 2 = 20
-        left: rangeBounds.left + rangeBounds.width / 2 - 20,
-        top: rangeBounds.top - 30,
-        display: "flex",
+        left: rangeBounds.left + rangeBounds.width / 2,
+        top: rangeBounds.top - 55,
+        display: "block",
     };
 }
 

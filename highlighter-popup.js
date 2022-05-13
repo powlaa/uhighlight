@@ -11,17 +11,22 @@ const template = `
         <span class="uhighlight" style="background-color: ${highlightColor}; display: inline"><button class="uhighlight-delete-btn">X</button></span>
     </template>
     <div id="highlighterPopup">
-        <button class="color-btn" id="color0"></button>
-        <button class="color-btn" id="color1"></button>
-        <button class="color-btn" id="color2"></button>
-        <button class="color-btn" id="color3"></button>
+        <div id="colors">
+            <button class="color-btn" id="color0"></button>
+            <button class="color-btn" id="color1"></button>
+            <button class="color-btn" id="color2"></button>
+            <button class="color-btn" id="color3"></button>
+        </div>
+        <div id="categories-container">
+            <select name="categories" id="categories">
+            </select>
+        </div>
     </div>
 `;
 
 const styled = ({ display = "none", left = 0, top = 0 }) => `
     #highlighterPopup {
-        align-items: center;
-        background-color: black;
+        background-color: #E8E5E5;
         border-radius: 5px;
         border: none;
         cursor: pointer;
@@ -32,6 +37,11 @@ const styled = ({ display = "none", left = 0, top = 0 }) => `
         position: fixed;
         top: ${top}px;
         z-index: 9999;
+    }
+    #colors {
+        align-items: center;
+        justify-content: space-around;
+        display: flex;
     }
     .color-btn {
         border-radius: 10px;
@@ -50,6 +60,9 @@ const styled = ({ display = "none", left = 0, top = 0 }) => `
     }
     #color3 {
         background-color: ${colors.color3}
+    }
+    #categories {
+        width: 100px;
     }
     .text-marker {
         fill: white;
@@ -88,18 +101,33 @@ class HighlighterPopup extends HTMLElement {
         style.textContent = styled({});
         this.shadowRoot.appendChild(style);
         this.shadowRoot.innerHTML += template;
-        this.shadowRoot
-            .getElementById("highlighterPopup")
-            .childNodes.forEach((btn) => btn.addEventListener("click", () => this.highlightSelection(btn.id)));
+        this.shadowRoot.getElementById("colors").childNodes.forEach((btn) =>
+            btn.addEventListener("click", () => {
+                const category = this.shadowRoot.getElementById("categories").value;
+                this.highlightSelection(btn.id, category);
+            })
+        );
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "markerPosition") {
             this.styleElement.textContent = styled(this.markerPosition);
+            //add options to dropdown
+            const categories = this.shadowRoot.getElementById("categories");
+            chrome.storage.local.get(["categories"], (res) => {
+                res.categories.forEach((category) => {
+                    if (![...categories.childNodes].find((option) => option.value === category)) {
+                        const option = document.createElement("option");
+                        option.value = category;
+                        option.innerHTML = category;
+                        categories.appendChild(option);
+                    }
+                });
+            });
         }
     }
 
-    highlightSelection(color) {
+    highlightSelection(color, category) {
         var userSelection = window.getSelection();
         for (let i = 0; i < userSelection.rangeCount; i++) {
             let range = userSelection.getRangeAt(i);
@@ -148,12 +176,9 @@ class HighlighterPopup extends HTMLElement {
                 endHTML: endHTML,
             };
 
-            var testCategories = ["Apples", "Bananas", "Pears"];
-
-            var randomCategory = testCategories[Math.floor(Math.random() * testCategories.length)];
             var id = Date.now();
-            this.saveHighlight(id, rInfo, randomCategory, colors[color]).then(() => {
-                this.highlightRange(range, id, randomCategory, colors[color], true);
+            this.saveHighlight(id, rInfo, category, colors[color]).then(() => {
+                this.highlightRange(range, id, category, colors[color], true);
             });
         }
     }
