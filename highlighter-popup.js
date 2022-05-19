@@ -61,6 +61,9 @@ const styled = ({ display = "none", left = 0, top = 0 }) => `
     #color3 {
         background-color: ${colors.color3}
     }
+    #categories-container {
+        display: inline-block;
+    }
     #categories {
         width: 100px;
     }
@@ -105,6 +108,7 @@ class HighlighterPopup extends HTMLElement {
             btn.addEventListener("click", () => {
                 const category = this.shadowRoot.getElementById("categories").value;
                 this.highlightSelection(btn.id, category);
+                this.dispatchEvent(new CustomEvent("addHighlight"));
             })
         );
     }

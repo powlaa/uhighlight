@@ -4,6 +4,9 @@ highlighterPopup.addEventListener("updateCategories", (evt) => {
     categories = evt.detail.categories;
     categoriesMenu.setAttribute("categories", JSON.stringify(categories));
 });
+highlighterPopup.addEventListener("addHighlight", () => {
+    window.getSelection().empty();
+});
 
 const categoriesMenu = document.createElement("categories-menu");
 document.body.appendChild(categoriesMenu);
