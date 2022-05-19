@@ -20,6 +20,7 @@ const template = `
         <div id="categories-container">
             <select name="categories" id="categories">
             </select>
+            <button id="categories-add">+</button>
         </div>
     </div>
 `;
@@ -67,6 +68,12 @@ const styled = ({ display = "none", left = 0, top = 0 }) => `
     #categories {
         width: 100px;
     }
+    #categories-add {
+        border-radius: 5px;
+        border: none;
+        background-color: white;
+        font-size: 1em;
+    }
     .text-marker {
         fill: white;
     }
@@ -111,6 +118,10 @@ class HighlighterPopup extends HTMLElement {
                 this.dispatchEvent(new CustomEvent("addHighlight"));
             })
         );
+        this.shadowRoot.getElementById("categories-add").addEventListener("click", () => {
+            //TODO: open popup to add category or somehow add category
+            console.log("add category");
+        });
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
