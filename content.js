@@ -2,22 +2,29 @@ const highlighterPopup = document.createElement("highlighter-popup");
 document.body.appendChild(highlighterPopup);
 highlighterPopup.addEventListener("updateCategories", (evt) => {
     categories = evt.detail.categories;
-    categoriesMenu.setAttribute("categories", JSON.stringify(categories));
+    floatingMenu.setAttribute("categories", JSON.stringify(categories));
 });
 highlighterPopup.addEventListener("addHighlight", () => {
-    window.getSelection().empty();
+    removeSelection();
 });
 
-const categoriesMenu = document.createElement("categories-menu");
-document.body.appendChild(categoriesMenu);
-categoriesMenu.addEventListener("updateActiveCategories", (evt) => {
+const floatingMenu = document.createElement("floating-menu");
+document.body.appendChild(floatingMenu);
+floatingMenu.addEventListener("updateActiveCategories", (evt) => {
     highlighterPopup.updateVisibleCategories(evt.detail.activeCategories);
+});
+floatingMenu.addEventListener("focusModeChanged", (evt) => {
+    console.log(`focus mode: ${evt.detail.focusMode}`);
+    focusMode = evt.detail.focusMode;
 });
 
 const setMarkerPosition = (markerPosition) =>
     highlighterPopup.setAttribute("markerPosition", JSON.stringify(markerPosition));
 
+const removeSelection = () => window.getSelection().empty();
+
 let categories = [];
+let focusMode = false;
 
 chrome.storage.local.get(["pages"], (res) => {
     let index = res.pages.findIndex((el) => el.url === window.location.href);
@@ -28,7 +35,7 @@ chrome.storage.local.get(["pages"], (res) => {
         });
 
         categories = [...new Set(res.pages[index].highlights.map((el) => el.category))];
-        categoriesMenu.setAttribute("categories", JSON.stringify(categories));
+        floatingMenu.setAttribute("categories", JSON.stringify(categories));
     }
 });
 
@@ -36,7 +43,10 @@ const getSelectedText = () => window.getSelection().toString();
 
 document.addEventListener("click", () => {
     if (getSelectedText().length > 0) {
-        setMarkerPosition(getMarkerPosition());
+        if (focusMode) {
+            highlighterPopup.highlightSelection("color0", "Apples");
+            removeSelection();
+        } else setMarkerPosition(getMarkerPosition());
     }
 });
 
