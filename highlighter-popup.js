@@ -1,10 +1,4 @@
 let highlightColor = "rgb(213, 234, 255)";
-const colors = {
-    color0: "#9CD4BB",
-    color1: "#B6B297",
-    color2: "#C4AED4",
-    color3: "#F3CD8E",
-};
 
 const template = `
     <template id="highlightTemplate">
@@ -25,7 +19,7 @@ const template = `
     </div>
 `;
 
-const styled = ({ display = "none", left = 0, top = 0 }) => `
+const styled = ({ display = "none", left = 0, top = 0, colors = {} }) => `
     #highlighterPopup {
         background-color: #E8E5E5;
         border-radius: 5px;
@@ -73,12 +67,6 @@ const styled = ({ display = "none", left = 0, top = 0 }) => `
         border: none;
         background-color: white;
         font-size: 1em;
-    }
-    .text-marker {
-        fill: white;
-    }
-    .text-marker:hover {
-        fill: ${highlightColor};
     }
 `;
 
@@ -146,8 +134,6 @@ class HighlighterPopup extends HTMLElement {
         var userSelection = window.getSelection();
         for (let i = 0; i < userSelection.rangeCount; i++) {
             let range = userSelection.getRangeAt(i);
-            console.log(range);
-
             let startNode = range.startContainer;
             let endNode = range.endContainer;
 
@@ -190,7 +176,6 @@ class HighlighterPopup extends HTMLElement {
                 endTagName: endTagName,
                 endHTML: endHTML,
             };
-
             var id = Date.now();
             this.saveHighlight(id, rInfo, category, colors[color]).then(() => {
                 this.highlightRange(range, id, category, colors[color], true);
@@ -199,7 +184,7 @@ class HighlighterPopup extends HTMLElement {
     }
 
     highlightRange(range, id, category, color, notify) {
-        if (!color) highlightColor = color;
+        if (!color) color = highlightColor;
         else highlightColor = color;
         const clone = this.highlightTemplate.cloneNode(true).content.firstElementChild;
         clone.classList.add("uhighlight-" + category);

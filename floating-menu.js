@@ -68,6 +68,29 @@ tmpl.innerHTML = `
             -ms-transform: translateX(20px);
             transform: translateX(20px);
         }
+        #colors {
+            align-items: center;
+            justify-content: space-around;
+            display: none;
+        }
+        .color-btn {
+            border-radius: 10px;
+            border: none;
+            width: 20px;
+            height: 20px;
+        }
+        #color0 {
+            background-color: ${colors.color0}
+        }
+        #color1 {
+            background-color: ${colors.color1}
+        }
+        #color2 {
+            background-color: ${colors.color2}
+        }
+        #color3 {
+            background-color: ${colors.color3}
+        }
     </style>
 
     <div id="floating-menu">
@@ -79,6 +102,12 @@ tmpl.innerHTML = `
                 <input type="checkbox" id="focus-mode">
                 <span class="slider round"></span>
             </label>
+            <div id="colors">
+                <button class="color-btn" id="color0"></button>
+                <button class="color-btn" id="color1"></button>
+                <button class="color-btn" id="color2"></button>
+                <button class="color-btn" id="color3"></button>
+            </div>
         </div>
     </div>
 `;
@@ -139,12 +168,10 @@ class FloatingMenu extends HTMLElement {
     }
 
     categoryClicked(evt) {
-        if (evt.target.classList.contains("active")) {
-            evt.target.classList.remove("active");
-            this.activeCategories = this.activeCategories.filter((el) => el !== evt.target.id);
-        } else {
-            evt.target.classList.add("active");
+        if (evt.target.checked) {
             this.activeCategories.push(evt.target.id);
+        } else {
+            this.activeCategories = this.activeCategories.filter((el) => el !== evt.target.id);
         }
         this.dispatchEvent(
             new CustomEvent("updateActiveCategories", { detail: { activeCategories: this.activeCategories } })

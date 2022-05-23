@@ -1,3 +1,7 @@
+let categories = [];
+let focusMode = false;
+let colors;
+
 const highlighterPopup = document.createElement("highlighter-popup");
 document.body.appendChild(highlighterPopup);
 highlighterPopup.addEventListener("updateCategories", (evt) => {
@@ -23,10 +27,8 @@ const setMarkerPosition = (markerPosition) =>
 
 const removeSelection = () => window.getSelection().empty();
 
-let categories = [];
-let focusMode = false;
-
-chrome.storage.local.get(["pages"], (res) => {
+chrome.storage.local.get(["pages", "colors"], (res) => {
+    colors = res.colors;
     let index = res.pages.findIndex((el) => el.url === window.location.href);
     if (index >= 0) {
         res.pages[index].highlights.forEach((highlight) => {
@@ -43,10 +45,8 @@ const getSelectedText = () => window.getSelection().toString();
 
 document.addEventListener("click", () => {
     if (getSelectedText().length > 0) {
-        if (focusMode) {
-            highlighterPopup.highlightSelection("color0", "Apples");
-            removeSelection();
-        } else setMarkerPosition(getMarkerPosition());
+        if (focusMode) addHighlightFocusMode();
+        else setMarkerPosition(getMarkerPosition());
     }
 });
 
@@ -63,7 +63,13 @@ function getMarkerPosition() {
         left: rangeBounds.left + rangeBounds.width / 2,
         top: rangeBounds.top - 55,
         display: "block",
+        colors: colors,
     };
+}
+
+function addHighlightFocusMode() {
+    highlighterPopup.highlightSelection("color0", "Apples");
+    removeSelection();
 }
 
 function buildRange({
