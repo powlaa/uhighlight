@@ -1,0 +1,27 @@
+.uhighlight-hidden {
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+.uhighlight {
+    position: relative;
+    border-radius: 5px;
+}
+.uhighlight:hover {
+    box-shadow: 2px 5px 7px rgb(0 0 0 / 20%);
+}
+.uhighlight-delete-btn {
+    display: none;
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 20px;
+    border: none;
+    background-color: red;
+    color: white;
+    font-size: 11px;
+}
+.uhighlight:hover > .uhighlight-delete-btn,
+.uhighlight-delete-btn:hover {
+    display: inline-block;
+}
