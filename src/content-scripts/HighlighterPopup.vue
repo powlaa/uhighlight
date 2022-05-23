@@ -1,15 +1,10 @@
 <template>
   <div id="highlighterPopup" ref="highlighterPopup">
-    <div id="colors">
-      <button
-        v-for="(color, index) in colors"
-        :key="color"
-        class="color-btn"
-        :id="`color${index}`"
-        :style="{ backgroundColor: color }"
-        @click="$emit('addHighlight', index, selectedCategory)"
-      ></button>
-    </div>
+    <ColorChoice
+      :colors="colors"
+      @colorClicked="(index) => $emit('addHighlight', index, selectedCategory)"
+    >
+    </ColorChoice>
     <div id="categories-container">
       <select v-model="selectedCategory" name="categories" id="categories">
         <option v-for="category in categories" :key="category">
@@ -23,6 +18,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
+import ColorChoice from "./ColorChoice.vue";
 
 const props = defineProps(["colors", "categories", "position"]);
 
