@@ -31,7 +31,7 @@ watch(
   (newCategories) => {
     if (newCategories.length > 0) {
       selectedCategory.value = newCategories[0];
-      emit("update:modelValue", selectedCategory.value);
+      emit("update:modelValue", newCategories[0]);
     }
   }
 );

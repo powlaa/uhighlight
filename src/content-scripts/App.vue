@@ -14,10 +14,13 @@
     @addHighlight="highlightSelection"
   ></HighlighterPopup>
   <FloatingMenu
-    :categories="usedCategories"
+    :usedCategories="usedCategories"
+    :categories="categories"
     :colors="colors"
     @updateActiveCategories="updateVisibleCategories"
+    @updateSelectedCategory="(category) => (focusModeCategory = category)"
     @chooseColor="(colorIndex) => (focusModeColorIndex = colorIndex)"
+    v-model:focus="focusMode"
   ></FloatingMenu>
 </template>
 
@@ -29,7 +32,7 @@ import FloatingMenu from "./FloatingMenu.vue";
 const highlightTemplate = ref(null);
 const highlighterPopupPosition = ref({ display: "none" });
 
-let focusMode = false;
+let focusMode = ref(false);
 let focusModeColorIndex = 0;
 let focusModeCategory = "";
 let colors = [];
@@ -59,7 +62,8 @@ onMounted(() => {
   });
   document.addEventListener("click", () => {
     if (getSelectedText().length > 0) {
-      if (focusMode) highlightSelection("color0", "Apples");
+      if (focusMode.value)
+        highlightSelection(focusModeColorIndex, focusModeCategory);
       else setHighlighterPopupPosition();
     }
   });

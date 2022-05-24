@@ -1,8 +1,8 @@
 <template>
-  <div id="floating-menu" v-if="visible">
+  <div id="floating-menu" v-show="visible">
     <h3>Highlights</h3>
     <div id="categories">
-      <div v-for="category in categories" :key="category">
+      <div v-for="category in usedCategories" :key="category">
         <input
           :id="category"
           type="checkbox"
@@ -15,31 +15,50 @@
     </div>
     <div class="focus-container">
       <label class="switch">
-        <input type="checkbox" id="focus-mode" />
+        <input
+          type="checkbox"
+          id="focus-mode"
+          v-model="focus"
+          @change="$emit('update:focus', focus)"
+        />
         <span class="slider round"></span>
       </label>
-      <ColorChoice
-        :colors="colors"
-        @colorClicked="(index) => $emit('chooseColor', index)"
-        :select="true"
-      >
-      </ColorChoice>
+      <div v-show="focus" class="focus-options">
+        <ColorChoice
+          :colors="colors"
+          @colorClicked="(index) => $emit('chooseColor', index)"
+          :select="true"
+        >
+        </ColorChoice>
+        <CategoryChoice
+          :categories="categories"
+          v-model="selectedCategory"
+        ></CategoryChoice>
+      </div>
     </div>
   </div>
 </template>
 
 
 <script setup>
-import { watch } from "vue";
+import { watch, ref } from "vue";
 import ColorChoice from "./ColorChoice.vue";
+import CategoryChoice from "./CategoryChoice.vue";
 
-const props = defineProps(["colors", "categories"]);
-const emit = defineEmits(["updateActiveCategories"]);
+const props = defineProps(["colors", "categories", "usedCategories"]);
+const emit = defineEmits([
+  "updateActiveCategories",
+  "update:focus",
+  "updateSelectedCategory",
+]);
+
+const selectedCategory = ref(null);
+const focus = ref(false);
 let activeCategories = [];
 let visible = false;
 
 watch(
-  () => props.categories,
+  () => props.usedCategories,
   (newCategories) => {
     if (newCategories.length > 0) {
       activeCategories = newCategories;
@@ -47,6 +66,13 @@ watch(
     } else {
       visible = false;
     }
+  }
+);
+
+watch(
+  () => selectedCategory.value,
+  (newSelectedCategory) => {
+    emit("updateSelectedCategory", newSelectedCategory);
   }
 );
 
@@ -136,5 +162,8 @@ input:checked + .slider:before {
   -webkit-transform: translateX(20px);
   -ms-transform: translateX(20px);
   transform: translateX(20px);
+}
+.focus-options {
+  padding-top: 5px;
 }
 </style>
