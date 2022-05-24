@@ -3,17 +3,30 @@
     <button
       v-for="(color, index) in colors"
       :key="color"
-      class="color-btn"
+      :class="{
+        'color-btn': true,
+        'selected-color': select && index === selectedIndex,
+      }"
       :id="`color${index}`"
       :style="{ backgroundColor: color }"
-      @click="$emit('colorClicked', index)"
+      @click="colorClicked(index)"
     ></button>
   </div>
 </template>
 
 
 <script setup>
-const props = defineProps(["colors"]);
+import { ref } from "vue";
+
+const props = defineProps(["colors", "select"]);
+const emit = defineEmits(["colorClicked"]);
+
+let selectedIndex = ref(0);
+
+function colorClicked(colorIndex) {
+  if (props.select) selectedIndex.value = colorIndex;
+  emit("colorClicked", colorIndex);
+}
 </script>
 
 <style>
@@ -28,5 +41,8 @@ const props = defineProps(["colors"]);
   border: none;
   width: 20px;
   height: 20px;
+}
+.selected-color {
+  border: 1px solid black !important;
 }
 </style>

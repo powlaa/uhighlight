@@ -5,20 +5,17 @@
       @colorClicked="(index) => $emit('addHighlight', index, selectedCategory)"
     >
     </ColorChoice>
-    <div id="categories-container">
-      <select v-model="selectedCategory" name="categories" id="categories">
-        <option v-for="category in categories" :key="category">
-          {{ category }}
-        </option>
-      </select>
-      <button id="categories-add">+</button>
-    </div>
+    <CategoryChoice
+      :categories="categories"
+      v-model="selectedCategory"
+    ></CategoryChoice>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, watch } from "vue";
 import ColorChoice from "./ColorChoice.vue";
+import CategoryChoice from "./CategoryChoice.vue";
 
 const props = defineProps(["colors", "categories", "position"]);
 
@@ -33,14 +30,6 @@ watch(
     highlighterPopup.value.style.display = newPosition.display ?? "none";
   }
 );
-
-watch(
-  () => props.categories,
-  (newCategories) => {
-    if (newCategories.length > 0) selectedCategory.value = newCategories[0];
-  }
-);
-onMounted(() => {});
 </script>
 
 <style>

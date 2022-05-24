@@ -1,5 +1,4 @@
 <template>
-  <div id="sample_text">hello sample</div>
   <span
     ref="highlightTemplate"
     id="highlightTemplate"
@@ -7,25 +6,35 @@
     style="display: none"
     ><button class="uhighlight-delete-btn">X</button></span
   >
+
   <HighlighterPopup
     :position="highlighterPopupPosition"
     :colors="colors"
     :categories="categories"
     @addHighlight="highlightSelection"
   ></HighlighterPopup>
+  <FloatingMenu
+    :categories="usedCategories"
+    :colors="colors"
+    @updateActiveCategories="updateVisibleCategories"
+    @chooseColor="(colorIndex) => (focusModeColorIndex = colorIndex)"
+  ></FloatingMenu>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import HighlighterPopup from "./HighlighterPopup.vue";
+import FloatingMenu from "./FloatingMenu.vue";
 
 const highlightTemplate = ref(null);
 const highlighterPopupPosition = ref({ display: "none" });
 
 let focusMode = false;
+let focusModeColorIndex = 0;
+let focusModeCategory = "";
 let colors = [];
 let categories = [];
-let usedCategories = [];
+let usedCategories = ref([]);
 
 onMounted(() => {
   chrome.storage.local.get(["pages", "colors", "categories"], (res) => {
@@ -43,7 +52,7 @@ onMounted(() => {
         );
       });
 
-      usedCategories = [
+      usedCategories.value = [
         ...new Set(res.pages[index].highlights.map((el) => el.category)),
       ];
     }
@@ -61,6 +70,21 @@ onMounted(() => {
     }
   });
 });
+
+function updateVisibleCategories(activeCategories) {
+  categories.forEach((category) => {
+    let highlights = document.getElementsByClassName("uhighlight-" + category);
+    if (activeCategories.includes(category)) {
+      for (let highlight of highlights) {
+        highlight.classList.remove("uhighlight-hidden");
+      }
+    } else {
+      for (let highlight of highlights) {
+        highlight.classList.add("uhighlight-hidden");
+      }
+    }
+  });
+}
 
 function setHighlighterPopupPosition() {
   const rangeBounds = window
@@ -178,6 +202,8 @@ function highlightSelection(colorIndex, category) {
       endHTML: endHTML,
     };
     var id = Date.now();
+    if (!usedCategories.value.find((cat) => cat === category))
+      usedCategories.value = [...usedCategories.value, category];
     saveHighlight(id, rInfo, category, colors[colorIndex]).then(() => {
       highlightRange(range, id, category, colors[colorIndex]);
     });
