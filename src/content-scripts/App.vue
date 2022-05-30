@@ -18,7 +18,7 @@
     :categories="categories"
     :colors="currentColors"
     :darkMode="darkMode"
-    :hidden="false"
+    :hidden="hideFloatingMenu"
     :usedCategories="usedCategories"
     @chooseColor="(colorIndex) => (focusModeColorIndex = colorIndex)"
     @darkModeChanged="
@@ -48,10 +48,11 @@ let currentColors = [];
 let colors = { lightMode: [], darkMode: [] };
 let darkMode = ref(false);
 let categories = [];
+let hideFloatingMenu = false;
 
 onMounted(() => {
   chrome.storage.local.get(
-    ["pages", "lightColors", "darkColors", "categories"],
+    ["pages", "lightColors", "darkColors", "categories", "hideFloatingMenu"],
     (res) => {
       let index = res.pages.findIndex((el) => el.url === window.location.href);
       if (index >= 0) {
@@ -75,6 +76,7 @@ onMounted(() => {
       colors = { lightMode: res.lightColors, darkMode: res.darkColors };
       currentColors = darkMode.value ? colors.darkMode : colors.lightMode;
       categories = res.categories;
+      hideFloatingMenu = res.hideFloatingMenu;
     }
   );
   document.addEventListener("click", () => {

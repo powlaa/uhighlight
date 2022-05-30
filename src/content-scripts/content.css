@@ -10,7 +10,6 @@
     --uhighlight-accent-color: #3f3f3f;
     --uhighlight-text-primary-color: #ddd;
 }
-
 .uhighlight-hidden {
     background-color: rgba(0, 0, 0, 0) !important;
 }
