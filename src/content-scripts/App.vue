@@ -9,23 +9,30 @@
 
   <HighlighterPopup
     :position="highlighterPopupPosition"
-    :colors="colors"
+    :colors="currentColors"
     :categories="categories"
     @addHighlight="highlightSelection"
   ></HighlighterPopup>
   <FloatingMenu
-    :usedCategories="usedCategories"
+    v-model:focus="focusMode"
     :categories="categories"
-    :colors="colors"
+    :colors="currentColors"
+    :darkMode="darkMode"
+    :usedCategories="usedCategories"
+    @chooseColor="(colorIndex) => (focusModeColorIndex = colorIndex)"
+    @darkModeChanged="
+      (newDarkModeValue) => {
+        darkMode = newDarkModeValue;
+        saveDarkMode(darkMode);
+      }
+    "
     @updateActiveCategories="updateVisibleCategories"
     @updateSelectedCategory="(category) => (focusModeCategory = category)"
-    @chooseColor="(colorIndex) => (focusModeColorIndex = colorIndex)"
-    v-model:focus="focusMode"
   ></FloatingMenu>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import HighlighterPopup from "./HighlighterPopup.vue";
 import FloatingMenu from "./FloatingMenu.vue";
 
@@ -33,33 +40,42 @@ const highlightTemplate = ref(null);
 const highlighterPopupPosition = ref({ display: "none" });
 
 let focusMode = ref(false);
+let usedCategories = ref([]);
 let focusModeColorIndex = 0;
 let focusModeCategory = "";
-let colors = [];
+let currentColors = [];
+let colors = { lightMode: [], darkMode: [] };
+let darkMode = ref(false);
 let categories = [];
-let usedCategories = ref([]);
 
 onMounted(() => {
-  chrome.storage.local.get(["pages", "colors", "categories"], (res) => {
-    colors = res.colors;
-    categories = res.categories;
-    let index = res.pages.findIndex((el) => el.url === window.location.href);
-    if (index >= 0) {
-      res.pages[index].highlights.forEach((highlight) => {
-        let range = buildRange(highlight.rInfo);
-        highlightRange(
-          range,
-          highlight.id,
-          highlight.category,
-          highlight.color
-        );
-      });
+  chrome.storage.local.get(
+    ["pages", "lightColors", "darkColors", "categories"],
+    (res) => {
+      let index = res.pages.findIndex((el) => el.url === window.location.href);
+      if (index >= 0) {
+        darkMode.value = res.pages[index].darkMode ?? userPrefersDarkMode();
+        res.pages[index].highlights.forEach((highlight) => {
+          let range = buildRange(highlight.rInfo);
+          highlightRange(
+            range,
+            highlight.id,
+            highlight.category,
+            highlight.color
+          );
+        });
 
-      usedCategories.value = [
-        ...new Set(res.pages[index].highlights.map((el) => el.category)),
-      ];
+        usedCategories.value = [
+          ...new Set(res.pages[index].highlights.map((el) => el.category)),
+        ];
+      } else {
+        darkMode.value = userPrefersDarkMode();
+      }
+      colors = { lightMode: res.lightColors, darkMode: res.darkColors };
+      currentColors = darkMode.value ? colors.darkMode : colors.lightMode;
+      categories = res.categories;
     }
-  });
+  );
   document.addEventListener("click", () => {
     if (getSelectedText().length > 0) {
       if (focusMode.value)
@@ -74,6 +90,20 @@ onMounted(() => {
     }
   });
 });
+
+watch(darkMode, (newDarkModeValue) => {
+  if (newDarkModeValue) {
+    document.documentElement.className = "uhighlight-dark-mode";
+    currentColors = colors.darkMode;
+  } else {
+    document.documentElement.className = "uhighlight-light-mode";
+    currentColors = colors.lightMode;
+  }
+});
+
+function userPrefersDarkMode() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
 
 function updateVisibleCategories(activeCategories) {
   categories.forEach((category) => {
@@ -208,8 +238,8 @@ function highlightSelection(colorIndex, category) {
     var id = Date.now();
     if (!usedCategories.value.find((cat) => cat === category))
       usedCategories.value = [...usedCategories.value, category];
-    saveHighlight(id, rInfo, category, colors[colorIndex]).then(() => {
-      highlightRange(range, id, category, colors[colorIndex]);
+    saveHighlight(id, rInfo, category, currentColors[colorIndex]).then(() => {
+      highlightRange(range, id, category, currentColors[colorIndex]);
     });
     removeSelection();
   }
@@ -224,11 +254,37 @@ function saveHighlight(id, rInfo, category, color) {
     chrome.storage.local.get(["pages"], (res) => {
       let index = res.pages.findIndex((el) => el.url === window.location.href);
       if (index >= 0) {
+        res.pages[index].darkMode = darkMode;
         res.pages[index].highlights.push({ id, category, color, rInfo });
       } else {
         res.pages.push({
           url: window.location.href,
+          darkMode: darkMode,
           highlights: [{ id, category, color, rInfo }],
+        });
+      }
+      chrome.storage.local.set(
+        {
+          pages: res.pages,
+        },
+        () => {
+          resolve();
+        }
+      );
+    });
+  });
+}
+
+function saveDarkMode(newDarkModeValue) {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(["pages"], (res) => {
+      let index = res.pages.findIndex((el) => el.url === window.location.href);
+      if (index >= 0) {
+        res.pages[index].darkMode = newDarkModeValue;
+      } else {
+        res.pages.push({
+          url: window.location.href,
+          darkMode: newDarkModeValue,
         });
       }
       chrome.storage.local.set(

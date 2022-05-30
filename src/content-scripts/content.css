@@ -1,3 +1,16 @@
+:root {
+    --uhighlight-background-color-primary: #e8e5e5;
+    --uhighlight-background-color-secondary: #fafafa;
+    --uhighlight-accent-color: #cacaca;
+    --uhighlight-text-primary-color: #222;
+}
+:root.uhighlight-dark-mode {
+    --uhighlight-background-color-primary: #343434;
+    --uhighlight-background-color-secondary: #2d2d30;
+    --uhighlight-accent-color: #3f3f3f;
+    --uhighlight-text-primary-color: #ddd;
+}
+
 .uhighlight-hidden {
     background-color: rgba(0, 0, 0, 0) !important;
 }

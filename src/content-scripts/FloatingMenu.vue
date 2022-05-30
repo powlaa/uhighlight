@@ -1,6 +1,11 @@
 <template>
   <div id="floating-menu" v-show="visible">
-    <h3>Highlights</h3>
+    <div class="dark-mode-icon" @click="$emit('darkModeChanged', !darkMode)">
+      <SunIcon v-show="darkMode" />
+      <MoonIcon v-show="!darkMode" />
+    </div>
+
+    <h3 class="no-highlight highlights-heading">Highlights</h3>
     <div id="categories">
       <div v-for="category in usedCategories" :key="category">
         <input
@@ -10,11 +15,11 @@
           checked
           @change="categoryClicked"
         />
-        <label :for="category">{{ category }}</label>
+        <label class="no-highlight" :for="category">{{ category }}</label>
       </div>
     </div>
     <div class="focus-container">
-      <label class="switch">
+      <label class="switch no-highlight">
         <input
           type="checkbox"
           id="focus-mode"
@@ -26,13 +31,13 @@
       <div v-show="focus" class="focus-options">
         <ColorChoice
           :colors="colors"
-          @colorClicked="(index) => $emit('chooseColor', index)"
           :select="true"
+          @colorClicked="(index) => $emit('chooseColor', index)"
         >
         </ColorChoice>
         <CategoryChoice
-          :categories="categories"
           v-model="selectedCategory"
+          :categories="categories"
         ></CategoryChoice>
       </div>
     </div>
@@ -42,10 +47,16 @@
 
 <script setup>
 import { watch, ref } from "vue";
+import { SunIcon, MoonIcon } from "@heroicons/vue/solid";
 import ColorChoice from "./ColorChoice.vue";
 import CategoryChoice from "./CategoryChoice.vue";
 
-const props = defineProps(["colors", "categories", "usedCategories"]);
+const props = defineProps([
+  "colors",
+  "categories",
+  "usedCategories",
+  "darkMode",
+]);
 const emit = defineEmits([
   "updateActiveCategories",
   "update:focus",
@@ -87,8 +98,7 @@ function categoryClicked(evt) {
 </script>
 
 <style>
-label,
-h3 {
+.no-highlight {
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;
   -khtml-user-select: none !important;
@@ -97,20 +107,27 @@ h3 {
   user-select: none !important;
 }
 #floating-menu {
+  background-color: var(--uhighlight-background-color-primary) !important;
+  color: var(--uhighlight-text-primary-color) !important;
   position: fixed !important;
   top: 20px !important;
   right: 20px !important;
   min-width: 100px !important;
-  background-color: white !important;
-  color: black !important;
   font-size: 1em !important;
   padding: 10px !important;
   border-radius: 10px !important;
   box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.2);
   z-index: 9999;
 }
-h3 {
-  margin: 3px 0 !important;
+.dark-mode-icon {
+  position: absolute;
+  height: 20px !important;
+  width: 20px !important;
+  top: 5px !important;
+  right: 5px !important;
+}
+.highlights-heading {
+  margin: 0px 20px 3px 0 !important;
 }
 .focus-container {
   display: inline-block;

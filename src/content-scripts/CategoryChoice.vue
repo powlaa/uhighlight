@@ -10,12 +10,13 @@
         {{ category }}
       </option>
     </select>
-    <button id="categories-add" @click="$emit('addCategory')">+</button>
+    <PlusIcon class="categories-add" @click="$emit('addCategory')" />
   </div>
 </template>
 
 <script setup>
 import { watch, ref } from "vue";
+import { PlusIcon } from "@heroicons/vue/solid";
 
 const emit = defineEmits(["update:modelValue"]);
 const props = defineProps(["categories"]);
@@ -39,15 +40,17 @@ watch(
 
 <style>
 #categories-container {
-  display: inline-block;
+  display: flex;
 }
 #categories {
   width: 100px;
+  background-color: var(--uhighlight-background-color-primary);
+  color: var(--uhighlight-text-primary-color);
 }
-#categories-add {
-  border-radius: 5px;
-  border: none;
-  background-color: white;
-  font-size: 1em;
+.categories-add {
+  color: var(--uhighlight-text-primary-color);
+  height: 21px;
+  width: 21px;
+  margin-left: 2px;
 }
 </style>
