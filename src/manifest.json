@@ -19,6 +19,7 @@
   "background": {
     "service_worker": "background.ts"
   },
+  "options_page": "options/index.html",
   "content_scripts": [
     {
       "matches": [
