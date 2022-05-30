@@ -1,44 +1,50 @@
 <template>
-  <div id="floating-menu" v-show="visible">
-    <div class="dark-mode-icon" @click="$emit('darkModeChanged', !darkMode)">
-      <SunIcon v-show="darkMode" />
-      <MoonIcon v-show="!darkMode" />
+  <div :class="{ hidden: hidden, 'floating-menu': true }" v-show="visible">
+    <div class="toggle-icon" @click="hidden = !hidden">
+      <ChevronRightIcon v-show="!hidden" />
+      <ChevronLeftIcon v-show="hidden" />
     </div>
-
-    <h3 class="no-highlight highlights-heading">Highlights</h3>
-    <div id="categories">
-      <div v-for="category in usedCategories" :key="category">
-        <input
-          :id="category"
-          type="checkbox"
-          :name="category"
-          checked
-          @change="categoryClicked"
-        />
-        <label class="no-highlight" :for="category">{{ category }}</label>
+    <div v-show="!hidden">
+      <div class="dark-mode-icon" @click="$emit('darkModeChanged', !darkMode)">
+        <SunIcon v-show="darkMode" />
+        <MoonIcon v-show="!darkMode" />
       </div>
-    </div>
-    <div class="focus-container">
-      <label class="switch no-highlight">
-        <input
-          type="checkbox"
-          id="focus-mode"
-          v-model="focus"
-          @change="$emit('update:focus', focus)"
-        />
-        <span class="slider round"></span>
-      </label>
-      <div v-show="focus" class="focus-options">
-        <ColorChoice
-          :colors="colors"
-          :select="true"
-          @colorClicked="(index) => $emit('chooseColor', index)"
-        >
-        </ColorChoice>
-        <CategoryChoice
-          v-model="selectedCategory"
-          :categories="categories"
-        ></CategoryChoice>
+
+      <h3 class="no-highlight highlights-heading">Highlights</h3>
+      <div id="categories">
+        <div v-for="category in usedCategories" :key="category">
+          <input
+            :id="category"
+            type="checkbox"
+            :name="category"
+            checked
+            @change="categoryClicked"
+          />
+          <label class="no-highlight" :for="category">{{ category }}</label>
+        </div>
+      </div>
+      <div class="focus-container">
+        <label class="switch no-highlight">
+          <input
+            type="checkbox"
+            id="focus-mode"
+            v-model="focus"
+            @change="$emit('update:focus', focus)"
+          />
+          <span class="slider round"></span>
+        </label>
+        <div v-show="focus" class="focus-options">
+          <ColorChoice
+            :colors="colors"
+            :select="true"
+            @colorClicked="(index) => $emit('chooseColor', index)"
+          >
+          </ColorChoice>
+          <CategoryChoice
+            v-model="selectedCategory"
+            :categories="categories"
+          ></CategoryChoice>
+        </div>
       </div>
     </div>
   </div>
@@ -47,7 +53,12 @@
 
 <script setup>
 import { watch, ref } from "vue";
-import { SunIcon, MoonIcon } from "@heroicons/vue/solid";
+import {
+  SunIcon,
+  MoonIcon,
+  ChevronRightIcon,
+  ChevronLeftIcon,
+} from "@heroicons/vue/solid";
 import ColorChoice from "./ColorChoice.vue";
 import CategoryChoice from "./CategoryChoice.vue";
 
@@ -56,6 +67,7 @@ const props = defineProps([
   "categories",
   "usedCategories",
   "darkMode",
+  "hidden",
 ]);
 const emit = defineEmits([
   "updateActiveCategories",
@@ -106,18 +118,25 @@ function categoryClicked(evt) {
   -ms-user-select: none !important;
   user-select: none !important;
 }
-#floating-menu {
+.floating-menu {
   background-color: var(--uhighlight-background-color-primary) !important;
   color: var(--uhighlight-text-primary-color) !important;
   position: fixed !important;
   top: 20px !important;
   right: 20px !important;
-  min-width: 100px !important;
   font-size: 1em !important;
   padding: 10px !important;
   border-radius: 10px !important;
   box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.2);
   z-index: 9999;
+  transition: border-radius 0.2s, right 0.2s;
+  transition-timing-function: ease-in;
+}
+.hidden.floating-menu {
+  right: 0px !important;
+  width: 20px !important;
+  height: 60px !important;
+  border-radius: 10px 0 0 10px !important;
 }
 .dark-mode-icon {
   position: absolute;
@@ -125,6 +144,16 @@ function categoryClicked(evt) {
   width: 20px !important;
   top: 5px !important;
   right: 5px !important;
+}
+.toggle-icon {
+  position: absolute;
+  height: 20px !important;
+  width: 20px !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  margin-top: auto;
+  margin-bottom: auto;
+  right: 0 !important;
 }
 .highlights-heading {
   margin: 0px 20px 3px 0 !important;

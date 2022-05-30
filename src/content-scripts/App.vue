@@ -18,6 +18,7 @@
     :categories="categories"
     :colors="currentColors"
     :darkMode="darkMode"
+    :hidden="false"
     :usedCategories="usedCategories"
     @chooseColor="(colorIndex) => (focusModeColorIndex = colorIndex)"
     @darkModeChanged="
