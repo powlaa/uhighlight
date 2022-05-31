@@ -38,7 +38,7 @@ watch(
 );
 </script>
 
-<style>
+<style scoped>
 #categories-container {
   display: flex;
 }

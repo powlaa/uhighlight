@@ -109,7 +109,7 @@ function categoryClicked(evt) {
 }
 </script>
 
-<style>
+<style scoped>
 .no-highlight {
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;

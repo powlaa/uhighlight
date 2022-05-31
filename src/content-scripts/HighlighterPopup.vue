@@ -32,7 +32,7 @@ watch(
 );
 </script>
 
-<style>
+<style scoped>
 #highlighterPopup {
   background-color: var(--uhighlight-background-color-primary);
   border-radius: 5px;

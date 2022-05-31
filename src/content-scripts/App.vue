@@ -241,7 +241,13 @@ function highlightSelection(colorIndex, category) {
     var id = Date.now();
     if (!usedCategories.value.find((cat) => cat === category))
       usedCategories.value = [...usedCategories.value, category];
-    saveHighlight(id, rInfo, category, currentColors[colorIndex]).then(() => {
+    saveHighlight(
+      id,
+      userSelection.toString(),
+      rInfo,
+      category,
+      currentColors[colorIndex]
+    ).then(() => {
       highlightRange(range, id, category, currentColors[colorIndex]);
     });
     removeSelection();
@@ -252,18 +258,18 @@ function removeSelection() {
   window.getSelection().empty();
 }
 
-function saveHighlight(id, rInfo, category, color) {
+function saveHighlight(id, text, rInfo, category, color) {
   return new Promise((resolve) => {
     chrome.storage.local.get(["pages"], (res) => {
       let index = res.pages.findIndex((el) => el.url === window.location.href);
       if (index >= 0) {
         res.pages[index].darkMode = darkMode;
-        res.pages[index].highlights.push({ id, category, color, rInfo });
+        res.pages[index].highlights.push({ id, category, color, text, rInfo });
       } else {
         res.pages.push({
           url: window.location.href,
           darkMode: darkMode,
-          highlights: [{ id, category, color, rInfo }],
+          highlights: [{ id, category, color, text, rInfo }],
         });
       }
       chrome.storage.local.set(

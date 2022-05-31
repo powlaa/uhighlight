@@ -29,7 +29,7 @@ function colorClicked(colorIndex) {
 }
 </script>
 
-<style>
+<style scoped>
 #colors {
   align-items: center;
   justify-content: space-around;
