@@ -33,6 +33,7 @@ let darkColors = ref([]);
 let hideFloatingMenu = ref(false);
 
 onMounted(() => {
+  setPreferredColorTheme();
   chrome.storage.local.get(
     ["lightColors", "darkColors", "hideFloatingMenu"],
     (res) => {
@@ -48,6 +49,11 @@ watch(hideFloatingMenu, (newValue) => {
     hideFloatingMenu: newValue,
   });
 });
+
+function setPreferredColorTheme() {
+  if (window.matchMedia("(prefers-color-scheme: dark)").matches)
+    document.documentElement.className = "uhighlight-dark-mode";
+}
 
 function saveLightColors(evt, index) {
   lightColors.value[index] = evt.target.value;
