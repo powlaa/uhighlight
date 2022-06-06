@@ -199,8 +199,9 @@ function highlightRange(range, id, category, color, notes) {
   clone.appendChild(range.extractContents());
   clone.id = "uhighlight-" + id;
   clone.addEventListener("click", addNote.bind(this));
-  let overlay = clone.getElementsByClassName("uhighlight-note-overlay")[0];
-  overlay.innerHTML = notes;
+  if (notes)
+    clone.getElementsByClassName("uhighlight-note-overlay")[0].innerHTML =
+      notes;
   range.insertNode(clone);
 }
 
