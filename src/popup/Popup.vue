@@ -73,9 +73,11 @@ html.uhighlight-dark-mode {
 .category {
   font-size: 1.2em;
   margin-bottom: 10px;
+  font-weight: bold;
 }
 .highlight {
   font-size: 0.8em;
+  font-weight: normal;
   background-color: var(--uhighlight-background-color-secondary);
   padding: 5px;
   margin-top: 5px;

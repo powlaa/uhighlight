@@ -4,8 +4,10 @@
     id="highlightTemplate"
     class="uhighlight"
     style="display: none"
-    ><button class="uhighlight-delete-btn">X</button></span
-  >
+    ><button class="uhighlight-delete-btn">X</button>
+    <input class="uhighlight-note-input" type="text" />
+    <div class="uhighlight-note-overlay"></div>
+  </span>
 
   <HighlighterPopup
     :position="highlighterPopupPosition"
@@ -51,6 +53,13 @@ let categories = [];
 let hideFloatingMenu = false;
 
 onMounted(() => {
+  document.documentElement.addEventListener("click", () => {
+    let inputs = document.getElementsByClassName("uhighlight-note-input");
+    for (let i = 0; i < inputs.length; i++) {
+      inputs[i].style.display = "none";
+    }
+  });
+
   chrome.storage.local.get(
     ["pages", "lightColors", "darkColors", "categories", "hideFloatingMenu"],
     (res) => {
@@ -63,7 +72,8 @@ onMounted(() => {
             range,
             highlight.id,
             highlight.category,
-            highlight.color
+            highlight.color,
+            highlight.notes
           );
         });
 
@@ -103,6 +113,39 @@ watch(darkMode, (newDarkModeValue) => {
     currentColors = colors.lightMode;
   }
 });
+
+function addNote(evt) {
+  disabledEventPropagation(evt);
+  let id = evt.target.id.replace("uhighlight-", "");
+  let input = evt.target.getElementsByClassName("uhighlight-note-input")[0];
+  input.style.display = "block";
+  input.addEventListener("change", () => {
+    evt.target.getElementsByClassName("uhighlight-note-overlay")[0].innerHTML =
+      input.value;
+    saveNote(input.value, id);
+  });
+  input.addEventListener("click", disabledEventPropagation);
+}
+
+function saveNote(noteText, id) {
+  chrome.storage.local.get(["pages"], (res) => {
+    let index = res.pages.findIndex((el) => el.url === window.location.href);
+    if (index >= 0) {
+      let highlight = res.pages[index].highlights.find((h) => h.id == id);
+      highlight.notes = noteText;
+    } else {
+      //TODO: something went wrong
+    }
+    chrome.storage.local.set({
+      pages: res.pages,
+    });
+  });
+}
+
+function disabledEventPropagation(evt) {
+  if (evt.stopPropagation) evt.stopPropagation();
+  else if (window.event) window.event.cancelBubble = true;
+}
 
 function userPrefersDarkMode() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -144,16 +187,20 @@ function getSelectedText() {
   return window.getSelection().toString();
 }
 
-function highlightRange(range, id, category, color) {
+function highlightRange(range, id, category, color, notes) {
   const clone = highlightTemplate.value.cloneNode(true);
   clone.classList.add("uhighlight-" + category);
   clone.style.backgroundColor = color;
   clone.style.display = "inline";
-  clone.appendChild(range.extractContents());
-  clone.id = "uhighlight-" + id;
   clone
     .getElementsByClassName("uhighlight-delete-btn")[0]
     .addEventListener("click", deleteHighlightClicked.bind(this));
+
+  clone.appendChild(range.extractContents());
+  clone.id = "uhighlight-" + id;
+  clone.addEventListener("click", addNote.bind(this));
+  let overlay = clone.getElementsByClassName("uhighlight-note-overlay")[0];
+  overlay.innerHTML = notes;
   range.insertNode(clone);
 }
 
@@ -248,7 +295,7 @@ function highlightSelection(colorIndex, category) {
       category,
       currentColors[colorIndex]
     ).then(() => {
-      highlightRange(range, id, category, currentColors[colorIndex]);
+      highlightRange(range, id, category, currentColors[colorIndex], "");
     });
     removeSelection();
   }

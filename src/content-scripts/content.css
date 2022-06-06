@@ -16,6 +16,7 @@
 .uhighlight {
     position: relative;
     border-radius: 5px;
+    cursor: pointer;
 }
 .uhighlight:hover {
     box-shadow: 2px 5px 7px rgb(0 0 0 / 20%);
@@ -33,7 +34,27 @@
     color: white;
     font-size: 11px;
 }
+.uhighlight-note-overlay {
+    display: none;
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 20px;
+    background-color: var(--uhighlight-background-color-primary);
+    color: var(--uhighlight-text-primary-color);
+    font-size: 1em;
+    z-index: 1;
+}
 .uhighlight:hover > .uhighlight-delete-btn,
-.uhighlight-delete-btn:hover {
+.uhighlight-delete-btn:hover,
+.uhighlight:hover > .uhighlight-note-overlay,
+.uhighlight-note-overlay:hover {
     display: inline-block;
+}
+.uhighlight-note-input {
+    display: none;
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 20px;
+    background-color: var(--uhighlight-background-color-primary);
+    color: var(--uhighlight-text-primary-color);
 }
