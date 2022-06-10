@@ -50,6 +50,9 @@
 .uhighlight-note-overlay:hover {
     display: inline-block;
 }
+.uhighlight-note-input:hover + .uhighlight-note-overlay {
+    display: none !important;
+}
 .uhighlight-note-input {
     display: none;
     position: absolute;
