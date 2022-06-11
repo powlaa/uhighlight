@@ -119,10 +119,14 @@ function addNote(evt) {
   let id = evt.target.id.replace("uhighlight-", "");
   let input = evt.target.getElementsByClassName("uhighlight-note-input")[0];
   input.style.display = "block";
-  input.addEventListener("change", () => {
-    evt.target.getElementsByClassName("uhighlight-note-overlay")[0].innerHTML =
-      input.value;
-    saveNote(input.value, id);
+}
+
+function setupNoteInput(input, id) {
+  input.addEventListener("change", (evt) => {
+    evt.target.parentNode.getElementsByClassName(
+      "uhighlight-note-overlay"
+    )[0].innerHTML = evt.target.value;
+    saveNote(evt.target.value, id);
   });
   input.addEventListener("click", disabledEventPropagation);
 }
@@ -199,9 +203,13 @@ function highlightRange(range, id, category, color, notes) {
   clone.appendChild(range.extractContents());
   clone.id = "uhighlight-" + id;
   clone.addEventListener("click", addNote.bind(this));
-  if (notes)
+  let input = clone.getElementsByClassName("uhighlight-note-input")[0];
+  setupNoteInput(input, id);
+  if (notes) {
     clone.getElementsByClassName("uhighlight-note-overlay")[0].innerHTML =
       notes;
+    input.value = notes;
+  }
   range.insertNode(clone);
 }
 
