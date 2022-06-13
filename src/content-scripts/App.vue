@@ -5,7 +5,7 @@
     class="uhighlight"
     style="display: none"
     ><button class="uhighlight-delete-btn">X</button>
-    <input class="uhighlight-note-input" type="text" />
+    <div class="uhighlight-note-input"></div>
     <div class="uhighlight-note-overlay"></div>
   </span>
 
@@ -36,6 +36,8 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
+import { Editor } from "@tiptap/core";
+import StarterKit from "@tiptap/starter-kit";
 import HighlighterPopup from "./HighlighterPopup.vue";
 import FloatingMenu from "./FloatingMenu.vue";
 
@@ -121,12 +123,17 @@ function addNote(evt) {
   input.style.display = "block";
 }
 
-function setupNoteInput(input, id) {
-  input.addEventListener("change", (evt) => {
-    evt.target.parentNode.getElementsByClassName(
-      "uhighlight-note-overlay"
-    )[0].innerHTML = evt.target.value;
-    saveNote(evt.target.value, id);
+function setupNoteInput(input, id, notes) {
+  new Editor({
+    element: input,
+    extensions: [StarterKit],
+    content: notes ? notes.toString() : "a",
+    onUpdate: ({ editor }) => {
+      input.parentNode.getElementsByClassName(
+        "uhighlight-note-overlay"
+      )[0].innerHTML = editor.getHTML();
+      saveNote(editor.getHTML(), id);
+    },
   });
   input.addEventListener("click", disabledEventPropagation);
 }
@@ -204,11 +211,10 @@ function highlightRange(range, id, category, color, notes) {
   clone.id = "uhighlight-" + id;
   clone.addEventListener("click", addNote.bind(this));
   let input = clone.getElementsByClassName("uhighlight-note-input")[0];
-  setupNoteInput(input, id);
+  setupNoteInput(input, id, notes);
   if (notes) {
-    clone.getElementsByClassName("uhighlight-note-overlay")[0].innerHTML =
-      notes;
-    input.value = notes;
+    overlay.innerHTML = notes;
+    // input.value = notes;
   }
   range.insertNode(clone);
 }
@@ -304,7 +310,7 @@ function highlightSelection(colorIndex, category) {
       category,
       currentColors[colorIndex]
     ).then(() => {
-      highlightRange(range, id, category, currentColors[colorIndex], "");
+      highlightRange(range, id, category, currentColors[colorIndex], null);
     });
     removeSelection();
   }

@@ -54,6 +54,7 @@
     display: none !important;
 }
 .uhighlight-note-input {
+    min-width: 100px;
     display: none;
     position: absolute;
     top: calc(100% + 5px);
