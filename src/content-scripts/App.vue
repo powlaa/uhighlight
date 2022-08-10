@@ -44,8 +44,8 @@ import FloatingMenu from "./FloatingMenu.vue";
 const highlightTemplate = ref(null);
 const highlighterPopupPosition = ref({ display: "none" });
 
-let focusMode = ref(false);
-let usedCategories = ref([]);
+const focusMode = ref(false);
+const usedCategories = ref([]);
 let focusModeColorIndex = 0;
 let focusModeCategory = "";
 let currentColors = [];
@@ -53,6 +53,7 @@ let colors = { lightMode: [], darkMode: [] };
 let darkMode = ref(false);
 let categories = [];
 let hideFloatingMenu = false;
+const editors = {};
 
 onMounted(() => {
   document.documentElement.addEventListener("click", () => {
@@ -119,26 +120,11 @@ watch(darkMode, (newDarkModeValue) => {
 function addNote(evt) {
   if (evt.target.classList.contains("uhighlight-delete-btn")) return;
   disabledEventPropagation(evt);
-  evt.target.id.replace("uhighlight-", "");
   const input = evt.target.getElementsByClassName("uhighlight-note-input")[0];
   input.style.display = "block";
-  //TODO: set focus to editor
-  input.focus(); //not working
-}
-
-function setupNoteInput(input, id, notes) {
-  new Editor({
-    element: input,
-    extensions: [StarterKit],
-    content: notes ? notes.toString() : "",
-    onUpdate: ({ editor }) => {
-      input.parentNode.getElementsByClassName(
-        "uhighlight-note-overlay"
-      )[0].innerHTML = editor.getHTML();
-      saveNote(editor.getHTML(), id);
-    },
-  });
-  input.addEventListener("click", disabledEventPropagation);
+  //focus the editor
+  const id = evt.target.id.replace("uhighlight-", "");
+  editors[id].commands.focus("end");
 }
 
 function saveNote(noteText, id) {
@@ -219,6 +205,21 @@ function highlightRange(range, id, category, color, notes) {
     clone.getElementsByClassName("uhighlight-note-overlay")[0].innerHTML =
       notes;
   range.insertNode(clone);
+}
+
+function setupNoteInput(input, id, notes) {
+  editors[id] = new Editor({
+    element: input,
+    extensions: [StarterKit],
+    content: notes ? notes.toString() : "",
+    onUpdate: ({ editor }) => {
+      input.parentNode.getElementsByClassName(
+        "uhighlight-note-overlay"
+      )[0].innerHTML = editor.getHTML();
+      saveNote(editor.getHTML(), id);
+    },
+  });
+  input.addEventListener("click", disabledEventPropagation);
 }
 
 function deleteHighlight(evt) {
