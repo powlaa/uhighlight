@@ -14,6 +14,7 @@
 }
 .uhighlight-hidden {
     background-color: rgba(0, 0, 0, 0) !important;
+    pointer-events: none;
 }
 .uhighlight {
     position: relative;
