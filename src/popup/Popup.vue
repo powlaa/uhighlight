@@ -1,25 +1,28 @@
 <template>
-  <div
-    class="category"
-    v-for="[category, highlights] in highlightsPerCategory"
-    :key="category"
-  >
-    {{ category }}
-    <div
-      class="highlight-container"
-      v-for="highlight in highlights"
-      :key="highlight"
-    >
-      <div class="highlight">
-        {{ highlight.text }}
-      </div>
-      <div class="notes" v-html="highlight.notes"></div>
-    </div>
+  <div v-for="[category, highlights] in highlightsPerCategory" :key="category">
+    <AccordionCollapse>
+      <template v-slot:title>
+        <span>{{ category }}</span>
+      </template>
+      <template v-slot:content>
+        <div
+          class="highlight-container"
+          v-for="highlight in highlights"
+          :key="highlight"
+        >
+          <div class="highlight">
+            {{ highlight.text }}
+          </div>
+          <div class="notes" v-html="highlight.notes"></div>
+        </div>
+      </template>
+    </AccordionCollapse>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
+import AccordionCollapse from "./AccordionCollapse.vue";
 
 const darkMode = ref(false);
 const highlightsPerCategory = ref(new Map());
@@ -77,23 +80,17 @@ html.uhighlight-dark-mode {
   --uhighlight-accent-color: #3f3f3f;
   --uhighlight-text-primary-color: #ddd;
 }
-.category {
-  font-size: 1.2em;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
 .highlight-container {
   margin-top: 10px;
   font-weight: normal;
 }
-
 .highlight,
 .notes {
   padding: 5px;
   border-radius: 5px;
   background-color: var(--uhighlight-background-color-secondary);
   margin-top: 5px;
-  font-size: 0.9em;
+  font-size: 1em;
 }
 .notes {
   margin-left: 20px;
