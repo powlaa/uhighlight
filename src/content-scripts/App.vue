@@ -117,17 +117,20 @@ watch(darkMode, (newDarkModeValue) => {
 });
 
 function addNote(evt) {
+  if (evt.target.classList.contains("uhighlight-delete-btn")) return;
   disabledEventPropagation(evt);
-  let id = evt.target.id.replace("uhighlight-", "");
-  let input = evt.target.getElementsByClassName("uhighlight-note-input")[0];
+  evt.target.id.replace("uhighlight-", "");
+  const input = evt.target.getElementsByClassName("uhighlight-note-input")[0];
   input.style.display = "block";
+  //TODO: set focus to editor
+  input.focus(); //not working
 }
 
 function setupNoteInput(input, id, notes) {
   new Editor({
     element: input,
     extensions: [StarterKit],
-    content: notes ? notes.toString() : "a",
+    content: notes ? notes.toString() : "",
     onUpdate: ({ editor }) => {
       input.parentNode.getElementsByClassName(
         "uhighlight-note-overlay"
@@ -205,25 +208,21 @@ function highlightRange(range, id, category, color, notes) {
   clone.style.display = "inline";
   clone
     .getElementsByClassName("uhighlight-delete-btn")[0]
-    .addEventListener("click", deleteHighlightClicked.bind(this));
+    .addEventListener("click", deleteHighlight.bind(this));
 
   clone.appendChild(range.extractContents());
   clone.id = "uhighlight-" + id;
   clone.addEventListener("click", addNote.bind(this));
   let input = clone.getElementsByClassName("uhighlight-note-input")[0];
   setupNoteInput(input, id, notes);
-  if (notes) {
-    overlay.innerHTML = notes;
-    // input.value = notes;
-  }
+  if (notes)
+    clone.getElementsByClassName("uhighlight-note-overlay")[0].innerHTML =
+      notes;
   range.insertNode(clone);
 }
 
-function deleteHighlightClicked(evt) {
-  deleteHighlight(evt.target.parentElement);
-}
-
-function deleteHighlight(element) {
+function deleteHighlight(evt) {
+  const element = evt.target.parentElement;
   let id = parseInt(element.id.substring(11));
   //remove delete button
   element.removeChild(element.childNodes[0]);
@@ -237,10 +236,10 @@ function deleteHighlight(element) {
         (el) => el.id !== id
       );
 
-      categories = [
+      categories.value = [
         ...new Set(res.pages[index].highlights.map((el) => el.category)),
       ];
-      // this.dispatchEvent(new CustomEvent("updateCategories", { detail: { categories: this.categories } }));
+      //TODO: update usedCategories -> if last highlight of category was deleted, also remove the category from usedcategories
       if (res.pages[index].highlights.length > 0) {
         chrome.storage.local.set({
           pages: res.pages,
