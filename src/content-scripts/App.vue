@@ -57,9 +57,11 @@ const editors = {};
 
 onMounted(() => {
   document.documentElement.addEventListener("click", () => {
-    let inputs = document.getElementsByClassName("uhighlight-note-input");
+    const inputs = document.getElementsByClassName("uhighlight-note-input");
+    const overlays = document.getElementsByClassName("uhighlight-note-overlay");
     for (let i = 0; i < inputs.length; i++) {
       inputs[i].style.display = "none";
+      overlays[i].style.display = null;
     }
   });
 
@@ -121,6 +123,9 @@ function addNote(evt) {
   if (evt.target.classList.contains("uhighlight-delete-btn")) return;
   disabledEventPropagation(evt);
   const input = evt.target.getElementsByClassName("uhighlight-note-input")[0];
+  evt.target.getElementsByClassName(
+    "uhighlight-note-overlay"
+  )[0].style.display = "none";
   input.style.display = "block";
   //focus the editor
   const id = evt.target.id.replace("uhighlight-", "");

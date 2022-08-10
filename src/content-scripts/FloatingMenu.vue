@@ -126,7 +126,7 @@ function categoryClicked(evt) {
   right: 20px !important;
   font-size: 1em !important;
   padding: 10px !important;
-  border-radius: 10px !important;
+  border-radius: var(--uhighlight-border-radius) !important;
   box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.2);
   z-index: 9999;
   transition: border-radius 0.2s, right 0.2s;

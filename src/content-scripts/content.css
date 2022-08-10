@@ -3,6 +3,8 @@
     --uhighlight-background-color-secondary: #fafafa;
     --uhighlight-accent-color: #cacaca;
     --uhighlight-text-primary-color: #222;
+
+    --uhighlight-border-radius: 10px;
 }
 :root.uhighlight-dark-mode {
     --uhighlight-background-color-primary: #343434;
@@ -39,6 +41,8 @@
     position: absolute;
     top: calc(100% + 5px);
     left: 20px;
+    padding: 8px;
+    border-radius: var(--uhighlight-border-radius);
     background-color: var(--uhighlight-background-color-primary);
     color: var(--uhighlight-text-primary-color);
     font-size: 1em;
@@ -59,6 +63,23 @@
     position: absolute;
     top: calc(100% + 5px);
     left: 20px;
+    padding: 8px;
+    border-radius: var(--uhighlight-border-radius);
     background-color: var(--uhighlight-background-color-primary);
     color: var(--uhighlight-text-primary-color);
+    z-index: 1;
+}
+
+/* tip tap styling */
+.uhighlight-note-input p,
+.uhighlight-note-input ul,
+.uhighlight-note-input ol,
+.uhighlight-note-overlay p,
+.uhighlight-note-overlay ul,
+.uhighlight-note-overlay ol {
+    margin-bottom: 8px !important;
+}
+.uhighlight-note-input li > p,
+.uhighlight-note-overlay li > p {
+    margin-top: 8px;
 }
