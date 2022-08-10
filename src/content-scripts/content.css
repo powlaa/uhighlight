@@ -84,3 +84,8 @@
 .uhighlight-note-overlay li > p {
     margin-top: 8px;
 }
+
+.uhighlight-note-overlay p:empty:before {
+    content: " ";
+    white-space: pre;
+}

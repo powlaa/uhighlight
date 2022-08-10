@@ -5,8 +5,15 @@
     :key="category"
   >
     {{ category }}
-    <div class="highlight" v-for="highlight in highlights" :key="highlight">
-      {{ highlight.text }}
+    <div
+      class="highlight-container"
+      v-for="highlight in highlights"
+      :key="highlight"
+    >
+      <div class="highlight">
+        {{ highlight.text }}
+      </div>
+      <div class="notes" v-html="highlight.notes"></div>
     </div>
   </div>
 </template>
@@ -14,18 +21,18 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 
-let darkMode = ref(false);
-let highlightsPerCategory = ref(new Map());
+const darkMode = ref(false);
+const highlightsPerCategory = ref(new Map());
 
 onMounted(() => {
   chrome.storage.local.get(["pages"], (res) => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       var url = tabs[0].url;
-      let index = res.pages.findIndex((el) => el.url === url);
+      const index = res.pages.findIndex((el) => el.url === url);
       if (index >= 0) {
         darkMode.value = res.pages[index].darkMode ?? userPrefersDarkMode();
         res.pages[index].highlights.forEach((highlight) => {
-          let categoryValue = highlightsPerCategory.value.get(
+          const categoryValue = highlightsPerCategory.value.get(
             highlight.category
           );
           if (categoryValue) {
@@ -75,12 +82,35 @@ html.uhighlight-dark-mode {
   margin-bottom: 10px;
   font-weight: bold;
 }
-.highlight {
-  font-size: 0.8em;
+.highlight-container {
+  margin-top: 10px;
   font-weight: normal;
-  background-color: var(--uhighlight-background-color-secondary);
+}
+
+.highlight,
+.notes {
   padding: 5px;
-  margin-top: 5px;
   border-radius: 5px;
+  background-color: var(--uhighlight-background-color-secondary);
+  margin-top: 5px;
+  font-size: 0.9em;
+}
+.notes {
+  margin-left: 20px;
+}
+
+/* tip tap styling */
+.notes p,
+.notes ul,
+.notes ol {
+  margin-bottom: 8px !important;
+  margin-top: 4px !important;
+}
+.notes li > p {
+  margin-top: 8px !important;
+}
+.notes p:empty:before {
+  content: " ";
+  white-space: pre;
 }
 </style>

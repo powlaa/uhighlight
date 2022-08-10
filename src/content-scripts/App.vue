@@ -204,7 +204,7 @@ function highlightRange(range, id, category, color, notes) {
   clone.appendChild(range.extractContents());
   clone.id = "uhighlight-" + id;
   clone.addEventListener("click", addNote.bind(this));
-  let input = clone.getElementsByClassName("uhighlight-note-input")[0];
+  const input = clone.getElementsByClassName("uhighlight-note-input")[0];
   setupNoteInput(input, id, notes);
   if (notes)
     clone.getElementsByClassName("uhighlight-note-overlay")[0].innerHTML =
