@@ -242,10 +242,9 @@ function deleteHighlight(evt) {
         (el) => el.id !== id
       );
 
-      categories.value = [
+      usedCategories.value = [
         ...new Set(res.pages[index].highlights.map((el) => el.category)),
       ];
-      //TODO: update usedCategories -> if last highlight of category was deleted, also remove the category from usedcategories
       if (res.pages[index].highlights.length > 0) {
         chrome.storage.local.set({
           pages: res.pages,
