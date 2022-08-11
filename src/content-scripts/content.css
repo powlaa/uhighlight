@@ -27,21 +27,21 @@
 .uhighlight-delete-btn {
     display: none;
     position: absolute;
-    top: -15px;
-    left: -15px;
-    width: 20px;
-    height: 20px;
+    top: -10px;
+    left: -10px;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+    border: 1px solid var(--uhighlight-text-primary-color);
     border-radius: 20px;
-    border: none;
-    background-color: red;
-    color: white;
-    font-size: 11px;
+    background-color: var(--uhighlight-background-color-primary);
+    color: var(--uhighlight-text-primary-color);
 }
 .uhighlight-note-overlay {
     display: none;
     position: absolute;
     top: calc(100% + 5px);
-    left: 20px;
+    left: 20%;
     padding: 8px;
     border-radius: var(--uhighlight-border-radius);
     background-color: var(--uhighlight-background-color-primary);
@@ -63,7 +63,7 @@
     display: none;
     position: absolute;
     top: calc(100% + 5px);
-    left: 20px;
+    left: 20%;
     padding: 8px;
     border-radius: var(--uhighlight-border-radius);
     background-color: var(--uhighlight-background-color-primary);

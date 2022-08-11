@@ -4,9 +4,36 @@
     id="highlightTemplate"
     class="uhighlight"
     style="display: none"
-    ><button class="uhighlight-delete-btn">X</button>
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="uhighlight-delete-btn"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
     <div class="uhighlight-note-input"></div>
-    <div class="uhighlight-note-overlay"></div>
+    <div class="uhighlight-note-overlay">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        style="width: 15px; height: 15px"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
   </span>
 
   <HighlighterPopup
