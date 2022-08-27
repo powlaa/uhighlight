@@ -18,3 +18,13 @@ chrome.runtime.onInstalled.addListener((details) => {
         }
     });
 });
+
+chrome.runtime.onMessage.addListener((message) => {
+    switch (message.action) {
+        case "addCategory":
+            chrome.runtime.openOptionsPage();
+            break;
+        default:
+            break;
+    }
+});

@@ -41,6 +41,7 @@
     :colors="currentColors"
     :categories="categories"
     @addHighlight="highlightSelection"
+    @addCategory="addCategory"
   ></HighlighterPopup>
   <FloatingMenu
     v-model:focus="focusMode"
@@ -91,36 +92,8 @@ onMounted(() => {
       overlays[i].style.display = null;
     }
   });
-
-  chrome.storage.local.get(
-    ["pages", "lightColors", "darkColors", "categories", "hideFloatingMenu"],
-    (res) => {
-      let index = res.pages.findIndex((el) => el.url === window.location.href);
-      if (index >= 0) {
-        darkMode.value = res.pages[index].darkMode ?? userPrefersDarkMode();
-        res.pages[index].highlights.forEach((highlight) => {
-          let range = buildRange(highlight.rInfo);
-          highlightRange(
-            range,
-            highlight.id,
-            highlight.category,
-            highlight.color,
-            highlight.notes
-          );
-        });
-
-        usedCategories.value = [
-          ...new Set(res.pages[index].highlights.map((el) => el.category)),
-        ];
-      } else {
-        darkMode.value = userPrefersDarkMode();
-      }
-      colors = { lightMode: res.lightColors, darkMode: res.darkColors };
-      currentColors = darkMode.value ? colors.darkMode : colors.lightMode;
-      categories = res.categories;
-      hideFloatingMenu = res.hideFloatingMenu;
-    }
-  );
+  window.onfocus = loadData;
+  loadData(true);
   document.addEventListener("click", () => {
     if (getSelectedText().length > 0) {
       if (focusMode.value)
@@ -145,6 +118,44 @@ watch(darkMode, (newDarkModeValue) => {
     currentColors = colors.lightMode;
   }
 });
+
+function loadData(addHighlights) {
+  chrome.storage.local.get(
+    ["pages", "lightColors", "darkColors", "categories", "hideFloatingMenu"],
+    (res) => {
+      let index = res.pages.findIndex((el) => el.url === window.location.href);
+      if (index >= 0) {
+        darkMode.value = res.pages[index].darkMode ?? userPrefersDarkMode();
+        if (typeof addHighlights === "boolean" && addHighlights) {
+          res.pages[index].highlights.forEach((highlight) => {
+            let range = buildRange(highlight.rInfo);
+            highlightRange(
+              range,
+              highlight.id,
+              highlight.category,
+              highlight.color,
+              highlight.notes
+            );
+          });
+        }
+
+        usedCategories.value = [
+          ...new Set(res.pages[index].highlights.map((el) => el.category)),
+        ];
+      } else {
+        darkMode.value = userPrefersDarkMode();
+      }
+      colors = { lightMode: res.lightColors, darkMode: res.darkColors };
+      currentColors = darkMode.value ? colors.darkMode : colors.lightMode;
+      categories = res.categories;
+      hideFloatingMenu = res.hideFloatingMenu;
+    }
+  );
+}
+
+function addCategory() {
+  chrome.runtime.sendMessage({ action: "addCategory" });
+}
 
 function addNote(evt) {
   if (evt.target.classList.contains("uhighlight-delete-btn")) return;

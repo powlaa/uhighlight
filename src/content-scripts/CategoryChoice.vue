@@ -10,7 +10,9 @@
         {{ category }}
       </option>
     </select>
-    <PlusIcon class="categories-add" @click="$emit('addCategory')" />
+    <button class="categories-btn" @click="$emit('addCategory')">
+      <PlusIcon class="categories-add" />
+    </button>
   </div>
 </template>
 
@@ -47,10 +49,19 @@ watch(
   background-color: var(--uhighlight-background-color-primary);
   color: var(--uhighlight-text-primary-color);
 }
+.categories-btn {
+  background-color: var(--uhighlight-background-color-primary);
+  border: none;
+  height: 30px;
+  width: 30px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .categories-add {
   color: var(--uhighlight-text-primary-color);
   height: 21px;
   width: 21px;
-  margin-left: 2px;
 }
 </style>

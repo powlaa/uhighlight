@@ -8,6 +8,7 @@
     <CategoryChoice
       :categories="categories"
       v-model="selectedCategory"
+      @addCategory="$emit('addCategory')"
     ></CategoryChoice>
   </div>
 </template>
