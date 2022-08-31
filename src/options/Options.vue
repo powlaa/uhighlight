@@ -1,9 +1,15 @@
 <template>
   <h1>Uhighlight Settings</h1>
   <div class="categories">
-    <h2>Categories</h2>
-    <div class="category-item" v-for="category in categories" :key="category">
+    <h2>Manage Categories</h2>
+    <div
+      class="category-item"
+      :id="category"
+      v-for="category in categories"
+      :key="category"
+    >
       {{ category }}
+      <TrashIcon class="category-delete" @click="deleteCategory" />
     </div>
     <input
       v-model="newCategoryName"
@@ -40,22 +46,25 @@
 
 <script setup>
 import { onMounted, ref, watch } from "vue";
+import { TrashIcon } from "@heroicons/vue/solid";
 import Switch from "./Switch.vue";
 const lightColors = ref([]);
 const darkColors = ref([]);
 const categories = ref([]);
 const hideFloatingMenu = ref(false);
 const newCategoryName = ref("");
+let pages = [];
 
 onMounted(() => {
   setPreferredColorTheme();
   chrome.storage.local.get(
-    ["lightColors", "darkColors", "categories", "hideFloatingMenu"],
+    ["lightColors", "darkColors", "categories", "hideFloatingMenu", "pages"],
     (res) => {
       lightColors.value = res.lightColors;
       darkColors.value = res.darkColors;
       categories.value = res.categories;
       hideFloatingMenu.value = res.hideFloatingMenu;
+      pages = res.pages;
     }
   );
 });
@@ -70,6 +79,35 @@ function addNewCategory() {
     categories.value.push(newCategoryName.value);
     chrome.storage.local.set({
       categories: [...categories.value],
+    });
+  }
+}
+
+function deleteCategory(evt) {
+  const category = evt.target.parentElement.classList.contains("category-item")
+    ? evt.target.parentElement.id
+    : evt.target.parentElement.parentElement.id;
+  let categoryHighlightCount = 0;
+  pages.forEach((page) => {
+    categoryHighlightCount += page.highlights.filter(
+      (el) => el.category === category
+    ).length;
+  });
+
+  if (
+    window.confirm(
+      `Do you really want to delete ${category}? There are ${categoryHighlightCount} highlights in this category that will be deleted as well!`
+    )
+  ) {
+    pages.forEach((page) => {
+      page.highlights = page.highlights.filter(
+        (el) => el.category !== category
+      );
+    });
+    categories.value = categories.value.filter((c) => c !== category);
+    chrome.storage.local.set({
+      categories: [...categories.value],
+      pages,
     });
   }
 }
@@ -121,6 +159,14 @@ input:focus {
 .category-item {
   font-size: 1em;
   padding: 5px;
+  color: var(--uhighlight-text-primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.category-delete {
+  height: 21px;
+  width: 21px;
 }
 .category-input {
   background-color: var(--uhighlight-background-color-primary);
