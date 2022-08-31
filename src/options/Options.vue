@@ -21,23 +21,31 @@
   </div>
   <h2>Default colors</h2>
   <h3>Light mode colors</h3>
-  <input
-    type="color"
-    class="color"
-    :value="color"
+  <div
+    class="color-container"
     v-for="(color, index) in lightColors"
     :key="color"
-    @change="(evt) => saveLightColors(evt, index)"
-  />
+  >
+    <input
+      type="color"
+      class="color"
+      :value="color"
+      @change="(evt) => saveLightColors(evt, index)"
+    />
+  </div>
   <h3>Dark mode colors</h3>
-  <input
-    type="color"
-    class="color"
-    :value="color"
+  <div
+    class="color-container"
     v-for="(color, index) in darkColors"
     :key="color"
-    @change="(evt) => saveDarkColors(evt, index)"
-  />
+  >
+    <input
+      type="color"
+      class="color"
+      :value="color"
+      @change="(evt) => saveDarkColors(evt, index)"
+    />
+  </div>
   <h2>Floating Menu</h2>
   <Switch v-model="hideFloatingMenu"
     ><div class="hide-floating">Hide Floating Menu per default</div></Switch
@@ -185,8 +193,23 @@ input:focus {
   padding: 0 5px;
   border-radius: 3px;
 }
-.color {
+.color-container {
   display: inline-block;
+  position: relative;
+  overflow: hidden;
+  width: 25px;
+  height: 25px;
+  margin-right: 5px;
+  border: solid 2px #ddd;
+  border-radius: 40px;
+}
+.color {
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  width: 40px;
+  height: 40px;
+  border: none;
 }
 .hide-floating {
   display: inline-block;
