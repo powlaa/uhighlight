@@ -23,7 +23,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://github.com/*"
+        "https://*/*",
+        "http://*/*"
       ],
       "run_at": "document_end",
       "js": [

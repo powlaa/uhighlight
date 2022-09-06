@@ -1,10 +1,13 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 
-window.onload = async () => {
-    const el = document.querySelector(".js-header-wrapper ");
+const interval = setInterval(mountAfterBodyLoaded, 100);
+
+function mountAfterBodyLoaded() {
+    const el = document.querySelector("body");
     if (el) {
-        el.insertAdjacentHTML("afterend", '<div id="app"></div>');
-        createApp(App).mount("#app");
+        el.insertAdjacentHTML("afterbegin", '<div id="uhighlight-wrapper"></div>');
+        createApp(App).mount("#uhighlight-wrapper");
+        clearInterval(interval);
     }
-};
+}
