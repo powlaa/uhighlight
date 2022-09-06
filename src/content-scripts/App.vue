@@ -130,23 +130,46 @@ function loadData(addHighlights) {
     (res) => {
       let index = res.pages.findIndex(
         (el) =>
-          el.url === window.location.href || el.wayback === window.location.href
+          el.url === window.location.href ||
+          el.wayback.url === window.location.href
       );
       console.log(res.pages);
 
       if (index >= 0) {
         darkMode.value = res.pages[index].darkMode ?? userPrefersDarkMode();
         if (typeof addHighlights === "boolean" && addHighlights) {
+          let error = false;
           res.pages[index].highlights.forEach((highlight) => {
-            let range = buildRange(highlight.rInfo);
-            highlightRange(
-              range,
-              highlight.id,
-              highlight.category,
-              highlight.color,
-              highlight.notes
-            );
+            try {
+              const range = buildRange(highlight.rInfo);
+              highlightRange(
+                range,
+                highlight.id,
+                highlight.category,
+                highlight.color,
+                highlight.notes
+              );
+            } catch (e) {
+              error = true;
+              console.warn(e);
+            }
           });
+          if (error) {
+            if (res.pages[index].wayback) {
+              const year = +res.pages[index].wayback.timestamp.substring(0, 4);
+              const month = +res.pages[index].wayback.timestamp.substring(4, 6);
+              const day = +res.pages[index].wayback.timestamp.substring(6, 8);
+              if (
+                confirm(
+                  `Some highlights failed to load, the website might have changed since the last time you visited. Do you want to switch to the wayback captured website from the ${day}.${month}.${year}?`
+                )
+              )
+                window.open(res.pages[index].wayback.url, "_blank").focus();
+            } else
+              alert(
+                "Some highlights failed to load, the website might have changed since the last time you visited but you can still look at your highlights and notes in the popup."
+              );
+          }
         }
 
         usedCategories.value = [
@@ -184,7 +207,8 @@ function saveNote(noteText, id) {
   chrome.storage.local.get(["pages"], (res) => {
     let index = res.pages.findIndex(
       (el) =>
-        el.url === window.location.href || el.wayback === window.location.href
+        el.url === window.location.href ||
+        el.wayback.url === window.location.href
     );
     if (index >= 0) {
       let highlight = res.pages[index].highlights.find((h) => h.id == id);
@@ -289,7 +313,8 @@ function deleteHighlight(evt) {
   chrome.storage.local.get(["pages"], (res) => {
     let index = res.pages.findIndex(
       (el) =>
-        el.url === window.location.href || el.wayback === window.location.href
+        el.url === window.location.href ||
+        el.wayback.url === window.location.href
     );
     if (index >= 0) {
       res.pages[index].highlights = res.pages[index].highlights.filter(
@@ -381,23 +406,45 @@ function saveHighlight(id, text, rInfo, category, color) {
   chrome.storage.local.get(["pages"], async (res) => {
     let index = res.pages.findIndex(
       (el) =>
-        el.url === window.location.href || el.wayback === window.location.href
+        el.url === window.location.href ||
+        el.wayback.url === window.location.href
     );
     if (index >= 0) {
-      res.pages[index].darkMode = darkMode;
-      res.pages[index].highlights.push({ id, category, color, text, rInfo });
+      try {
+        const response = await fetch(
+          `https://archive.org/wayback/available?url=${window.location.href}`
+        );
+        const data = await response.json();
+        res.pages[index].wayback = {
+          url: data?.archived_snapshots?.closest.url.replace(
+            "http://",
+            "https://"
+          ),
+          timestamp: data?.archived_snapshots?.closest?.timestamp,
+        };
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        res.pages[index].darkMode = darkMode;
+        res.pages[index].highlights.push({ id, category, color, text, rInfo });
+      }
     } else {
       try {
         const response = await fetch(
           `http://archive.org/wayback/available?url=${window.location.href}`
         );
         const data = await response.json();
-        console.log(data);
         res.pages.push({
           url: window.location.href,
           darkMode: darkMode,
           highlights: [{ id, category, color, text, rInfo }],
-          wayback: data.archived_snapshots.closest.url,
+          wayback: {
+            url: data?.archived_snapshots?.closest.url.replace(
+              "http://",
+              "https://"
+            ),
+            timestamp: data?.archived_snapshots?.closest?.timestamp,
+          },
         });
       } catch (e) {
         console.warn(e);
@@ -419,7 +466,8 @@ function saveDarkMode(newDarkModeValue) {
     chrome.storage.local.get(["pages"], (res) => {
       let index = res.pages.findIndex(
         (el) =>
-          el.url === window.location.href || el.wayback === window.location.href
+          el.url === window.location.href ||
+          el.wayback.url === window.location.href
       );
       if (index >= 0) {
         res.pages[index].darkMode = newDarkModeValue;
@@ -453,35 +501,35 @@ function buildRange({
   endTagName,
   endHTML,
 }) {
-  let sP = findEle(startTagName, startHTML);
-  let eP = findEle(endTagName, endHTML);
-  var s, e;
+  const sP = findEle(startTagName, startHTML);
+  const eP = findEle(endTagName, endHTML);
+  let s, e;
   if (startIsText) {
-    let childs = sP.childNodes;
-    for (let i = 0; i < childs.length; i++) {
-      if (childs[i].nodeType == 3 && childs[i].nodeValue == startNode)
-        s = childs[i];
+    const children = sP.childNodes;
+    for (let i = 0; i < children.length; i++) {
+      if (children[i].nodeType == 3 && children[i].nodeValue == startNode)
+        s = children[i];
     }
   } else {
     s = sP;
   }
   if (endIsText) {
-    let childs = eP.childNodes;
-    for (let i = 0; i < childs.length; i++) {
-      if (childs[i].nodeType == 3 && childs[i].nodeValue == endNode)
-        e = childs[i];
+    const children = eP.childNodes;
+    for (let i = 0; i < children.length; i++) {
+      if (children[i].nodeType == 3 && children[i].nodeValue == endNode)
+        e = children[i];
     }
   } else {
     e = eP;
   }
-  let range = document.createRange();
+  const range = document.createRange();
   range.setStart(s, startOffset);
   range.setEnd(e, endOffset);
   return range;
 }
 
 function findEle(tagName, innerHTML) {
-  let list = document.getElementsByTagName(tagName);
+  const list = document.getElementsByTagName(tagName);
   for (let i = 0; i < list.length; i++) {
     if (list[i].innerHTML == innerHTML) {
       return list[i];
