@@ -12,6 +12,7 @@
     "@tiptap/starter-kit": "^2.0.0-beta.185",
     "@webcomponents/custom-elements": "^1.5.0",
     "dotenv": "^16.0.0",
+    "pinia": "^2.0.22",
     "rollup-plugin-alias": "^2.2.0",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-import-css": "^3.0.3",

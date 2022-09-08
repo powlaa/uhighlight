@@ -51,12 +51,7 @@
     :hidden="hideFloatingMenu"
     :usedCategories="usedCategories"
     @chooseColor="(colorIndex) => (focusModeColorIndex = colorIndex)"
-    @darkModeChanged="
-      (newDarkModeValue) => {
-        darkMode = newDarkModeValue;
-        saveDarkMode(darkMode);
-      }
-    "
+    @darkModeChanged="changeDarkMode"
     @updateActiveCategories="updateVisibleCategories"
     @updateSelectedCategory="(category) => (focusModeCategory = category)"
   ></FloatingMenu>
@@ -66,8 +61,20 @@
 import { ref, onMounted, watch } from "vue";
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
+import { useMainStore } from "./store.js";
+import { storeToRefs } from "pinia";
 import HighlighterPopup from "./HighlighterPopup.vue";
 import FloatingMenu from "./FloatingMenu.vue";
+
+const store = useMainStore();
+const {
+  pages,
+  categories,
+  lightColors,
+  darkColors,
+  hideFloatingMenu,
+  getPage,
+} = storeToRefs(useMainStore());
 
 const highlightTemplate = ref(null);
 const highlighterPopupPosition = ref({ display: "none" });
@@ -78,9 +85,7 @@ let focusModeColorIndex = 0;
 let focusModeCategory = "";
 let currentColors = [];
 let colors = { lightMode: [], darkMode: [] };
-let darkMode = ref(false);
-let categories = [];
-let hideFloatingMenu = false;
+const darkMode = ref(false);
 const editors = {};
 
 onMounted(() => {
@@ -124,66 +129,56 @@ watch(darkMode, (newDarkModeValue) => {
   }
 });
 
-function loadData(addHighlights) {
-  chrome.storage.local.get(
-    ["pages", "lightColors", "darkColors", "categories", "hideFloatingMenu"],
-    (res) => {
-      let index = res.pages.findIndex(
-        (el) =>
-          el.url === window.location.href ||
-          el.wayback.url === window.location.href
-      );
-      console.log(res.pages);
+watch(pages, () => {
+  usedCategories.value = [
+    ...new Set(getPage.value?.highlights.map((el) => el.category)),
+  ];
+});
 
-      if (index >= 0) {
-        darkMode.value = res.pages[index].darkMode ?? userPrefersDarkMode();
-        if (typeof addHighlights === "boolean" && addHighlights) {
-          let error = false;
-          res.pages[index].highlights.forEach((highlight) => {
-            try {
-              const range = buildRange(highlight.rInfo);
-              highlightRange(
-                range,
-                highlight.id,
-                highlight.category,
-                highlight.color,
-                highlight.notes
-              );
-            } catch (e) {
-              error = true;
-              console.warn(e);
-            }
-          });
-          if (error) {
-            if (res.pages[index].wayback) {
-              const year = +res.pages[index].wayback.timestamp.substring(0, 4);
-              const month = +res.pages[index].wayback.timestamp.substring(4, 6);
-              const day = +res.pages[index].wayback.timestamp.substring(6, 8);
-              if (
-                confirm(
-                  `Some highlights failed to load, the website might have changed since the last time you visited. Do you want to switch to the wayback captured website from the ${day}.${month}.${year}?`
-                )
-              )
-                window.open(res.pages[index].wayback.url, "_blank").focus();
-            } else
-              alert(
-                "Some highlights failed to load, the website might have changed since the last time you visited but you can still look at your highlights and notes in the popup."
-              );
-          }
+async function loadData(addHighlights) {
+  await store.getAllStorageData();
+  const page = getPage.value;
+  if (!page) {
+    darkMode.value = userPrefersDarkMode();
+  } else {
+    darkMode.value = page.darkMode ?? userPrefersDarkMode();
+    if (typeof addHighlights === "boolean" && addHighlights) {
+      let error = false;
+      page.highlights.forEach((highlight) => {
+        try {
+          const range = buildRange(highlight.rInfo);
+          highlightRange(
+            range,
+            highlight.id,
+            highlight.category,
+            highlight.color,
+            highlight.notes
+          );
+        } catch (e) {
+          error = true;
+          console.warn(e);
         }
-
-        usedCategories.value = [
-          ...new Set(res.pages[index].highlights.map((el) => el.category)),
-        ];
-      } else {
-        darkMode.value = userPrefersDarkMode();
+      });
+      if (error) {
+        if (page.wayback) {
+          const year = +page.wayback.timestamp.substring(0, 4);
+          const month = +page.wayback.timestamp.substring(4, 6);
+          const day = +page.wayback.timestamp.substring(6, 8);
+          if (
+            confirm(
+              `Some highlights failed to load, the website might have changed since the last time you visited. Do you want to switch to the wayback captured website from the ${day}.${month}.${year}?`
+            )
+          )
+            window.open(page.wayback.url, "_blank").focus();
+        } else
+          alert(
+            "Some highlights failed to load, the website might have changed since the last time you visited but you can still look at your highlights and notes in the popup."
+          );
       }
-      colors = { lightMode: res.lightColors, darkMode: res.darkColors };
-      currentColors = darkMode.value ? colors.darkMode : colors.lightMode;
-      categories = res.categories;
-      hideFloatingMenu = res.hideFloatingMenu;
     }
-  );
+  }
+  colors = { lightMode: lightColors.value, darkMode: darkColors.value };
+  currentColors = darkMode.value ? colors.darkMode : colors.lightMode;
 }
 
 function addCategory() {
@@ -203,25 +198,6 @@ function addNote(evt) {
   editors[id].commands.focus("end");
 }
 
-function saveNote(noteText, id) {
-  chrome.storage.local.get(["pages"], (res) => {
-    let index = res.pages.findIndex(
-      (el) =>
-        el.url === window.location.href ||
-        el.wayback.url === window.location.href
-    );
-    if (index >= 0) {
-      let highlight = res.pages[index].highlights.find((h) => h.id == id);
-      highlight.notes = noteText;
-    } else {
-      //TODO: something went wrong
-    }
-    chrome.storage.local.set({
-      pages: res.pages,
-    });
-  });
-}
-
 function disabledEventPropagation(evt) {
   if (evt.stopPropagation) evt.stopPropagation();
   else if (window.event) window.event.cancelBubble = true;
@@ -232,7 +208,7 @@ function userPrefersDarkMode() {
 }
 
 function updateVisibleCategories(activeCategories) {
-  categories.forEach((category) => {
+  categories.value.forEach((category) => {
     let highlights = document.getElementsByClassName("uhighlight-" + category);
     if (activeCategories.includes(category)) {
       for (let highlight of highlights) {
@@ -296,7 +272,7 @@ function setupNoteInput(input, id, notes) {
       input.parentNode.getElementsByClassName(
         "uhighlight-note-overlay"
       )[0].innerHTML = editor.getHTML();
-      saveNote(editor.getHTML(), id);
+      store.saveNote(editor.getHTML(), id);
     },
   });
   input.addEventListener("click", disabledEventPropagation);
@@ -310,31 +286,7 @@ function deleteHighlight(evt) {
   element.outerHTML = element.innerHTML;
 
   //delete from storage
-  chrome.storage.local.get(["pages"], (res) => {
-    let index = res.pages.findIndex(
-      (el) =>
-        el.url === window.location.href ||
-        el.wayback.url === window.location.href
-    );
-    if (index >= 0) {
-      res.pages[index].highlights = res.pages[index].highlights.filter(
-        (el) => el.id !== id
-      );
-
-      usedCategories.value = [
-        ...new Set(res.pages[index].highlights.map((el) => el.category)),
-      ];
-      if (res.pages[index].highlights.length > 0) {
-        chrome.storage.local.set({
-          pages: res.pages,
-        });
-      } else {
-        chrome.storage.local.set({
-          pages: res.pages.filter((page) => page.url !== window.location.href),
-        });
-      }
-    }
-  });
+  store.deleteHighlight(id);
 }
 
 function highlightSelection(colorIndex, category) {
@@ -386,7 +338,8 @@ function highlightSelection(colorIndex, category) {
     var id = Date.now();
     if (!usedCategories.value.find((cat) => cat === category))
       usedCategories.value = [...usedCategories.value, category];
-    saveHighlight(
+    store.addHighlight(
+      darkMode.value,
       id,
       userSelection.toString(),
       rInfo,
@@ -402,91 +355,9 @@ function removeSelection() {
   window.getSelection().empty();
 }
 
-function saveHighlight(id, text, rInfo, category, color) {
-  chrome.storage.local.get(["pages"], async (res) => {
-    let index = res.pages.findIndex(
-      (el) =>
-        el.url === window.location.href ||
-        el.wayback.url === window.location.href
-    );
-    if (index >= 0) {
-      try {
-        const response = await fetch(
-          `https://archive.org/wayback/available?url=${window.location.href}`
-        );
-        const data = await response.json();
-        res.pages[index].wayback = {
-          url: data?.archived_snapshots?.closest.url.replace(
-            "http://",
-            "https://"
-          ),
-          timestamp: data?.archived_snapshots?.closest?.timestamp,
-        };
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        res.pages[index].darkMode = darkMode;
-        res.pages[index].highlights.push({ id, category, color, text, rInfo });
-      }
-    } else {
-      try {
-        const response = await fetch(
-          `http://archive.org/wayback/available?url=${window.location.href}`
-        );
-        const data = await response.json();
-        res.pages.push({
-          url: window.location.href,
-          darkMode: darkMode,
-          highlights: [{ id, category, color, text, rInfo }],
-          wayback: {
-            url: data?.archived_snapshots?.closest.url.replace(
-              "http://",
-              "https://"
-            ),
-            timestamp: data?.archived_snapshots?.closest?.timestamp,
-          },
-        });
-      } catch (e) {
-        console.warn(e);
-        res.pages.push({
-          url: window.location.href,
-          darkMode: darkMode,
-          highlights: [{ id, category, color, text, rInfo }],
-        });
-      }
-    }
-    chrome.storage.local.set({
-      pages: res.pages,
-    });
-  });
-}
-
-function saveDarkMode(newDarkModeValue) {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(["pages"], (res) => {
-      let index = res.pages.findIndex(
-        (el) =>
-          el.url === window.location.href ||
-          el.wayback.url === window.location.href
-      );
-      if (index >= 0) {
-        res.pages[index].darkMode = newDarkModeValue;
-      } else {
-        res.pages.push({
-          url: window.location.href,
-          darkMode: newDarkModeValue,
-        });
-      }
-      chrome.storage.local.set(
-        {
-          pages: res.pages,
-        },
-        () => {
-          resolve();
-        }
-      );
-    });
-  });
+function changeDarkMode(newDarkModeValue) {
+  darkMode.value = newDarkModeValue;
+  store.saveDarkMode(darkMode.value);
 }
 
 function buildRange({
