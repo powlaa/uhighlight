@@ -67,9 +67,8 @@ import HighlighterPopup from "./HighlighterPopup.vue";
 import FloatingMenu from "./FloatingMenu.vue";
 
 const store = useMainStore();
-const { pages, categories, colors, hideFloatingMenu, getPage } = storeToRefs(
-  useMainStore()
-);
+const { pages, highlights, categories, colors, hideFloatingMenu, getPage } =
+  storeToRefs(useMainStore());
 
 const highlightTemplate = ref(null);
 const highlighterPopupPosition = ref({ display: "none" });
@@ -124,9 +123,11 @@ watch(darkMode, (newDarkModeValue) => {
   updateHighlightColors();
 });
 
-watch(pages, () => {
+watch(highlights, () => {
   usedCategories.value = [
-    ...new Set(getPage.value?.highlights.map((el) => el.category)),
+    ...new Set(
+      getPage.value?.highlights.map((id) => highlights.value[id].category)
+    ),
   ];
 });
 
@@ -142,15 +143,15 @@ async function loadData(addHighlights) {
     );
     if (typeof addHighlights === "boolean" && addHighlights) {
       let error = false;
-      page.highlights.forEach((highlight) => {
+      page.highlights.forEach((highlightId) => {
         try {
-          const range = buildRange(highlight.rInfo);
+          const range = buildRange(highlights.value[highlightId].rInfo);
           highlightRange(
             range,
-            highlight.id,
-            highlight.category,
-            highlight.colorIndex,
-            highlight.notes
+            highlightId,
+            highlights.value[highlightId].category,
+            highlights.value[highlightId].colorIndex,
+            highlights.value[highlightId].notes
           );
         } catch (e) {
           error = true;
@@ -207,13 +208,15 @@ function userPrefersDarkMode() {
 
 function updateVisibleCategories(activeCategories) {
   categories.value.forEach((category) => {
-    let highlights = document.getElementsByClassName("uhighlight-" + category);
+    let highlightElements = document.getElementsByClassName(
+      "uhighlight-" + category
+    );
     if (activeCategories.includes(category)) {
-      for (let highlight of highlights) {
+      for (let highlight of highlightElements) {
         highlight.classList.remove("uhighlight-hidden");
       }
     } else {
-      for (let highlight of highlights) {
+      for (let highlight of highlightElements) {
         highlight.classList.add("uhighlight-hidden");
       }
     }
@@ -222,10 +225,10 @@ function updateVisibleCategories(activeCategories) {
 
 function updateHighlightColors() {
   currentColors.forEach((color, index) => {
-    const highlights = document.getElementsByClassName(
+    const highlightElements = document.getElementsByClassName(
       `uhighlight-color-${index}`
     );
-    for (let highlight of highlights) {
+    for (let highlight of highlightElements) {
       highlight.style.backgroundColor = color;
     }
   });

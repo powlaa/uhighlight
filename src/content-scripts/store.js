@@ -4,6 +4,7 @@ export const useMainStore = defineStore({
     id: "main",
     state: () => ({
         pages: [],
+        highlights: {},
         categories: [],
         colors: [],
         hideFloatingMenu: false,
@@ -17,9 +18,10 @@ export const useMainStore = defineStore({
     actions: {
         getAllStorageData() {
             return new Promise((resolve, reject) => {
-                chrome.storage.local.get(["pages", "colors", "categories", "hideFloatingMenu"], (res) => {
+                chrome.storage.local.get(["pages", "highlights", "colors", "categories", "hideFloatingMenu"], (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                     this.pages = res.pages;
+                    this.highlights = res.highlights;
                     this.colors = res.colors;
                     this.categories = res.categories;
                     this.hideFloatingMenu = res.hideFloatingMenu;
@@ -38,9 +40,10 @@ export const useMainStore = defineStore({
         },
         addHighlight(darkMode, id, text, rInfo, category, colorIndex) {
             return new Promise((resolve, reject) => {
-                chrome.storage.local.get(["pages"], async (res) => {
+                chrome.storage.local.get(["pages", "highlights"], async (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                     const pages = res.pages;
+                    const highlights = res.highlights;
                     let page = pages.find((page) => page.url === this.url || page.wayback.url === this.url);
                     if (!page) {
                         page = {
@@ -51,13 +54,8 @@ export const useMainStore = defineStore({
                         pages.push(page);
                     }
                     page.darkMode = darkMode;
-                    page.highlights.push({
-                        id,
-                        category,
-                        colorIndex,
-                        text,
-                        rInfo,
-                    });
+                    page.highlights.push(id);
+                    highlights[id] = { category, colorIndex, text, rInfo };
                     try {
                         const response = await fetch(`http://archive.org/wayback/available?url=${window.location.href}`);
                         const data = await response.json();
@@ -68,10 +66,10 @@ export const useMainStore = defineStore({
                     } catch (e) {
                         console.warn(e);
                     }
-                    console.log(pages);
-                    chrome.storage.local.set({ pages }, () => {
+                    chrome.storage.local.set({ pages, highlights }, () => {
                         if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                         this.pages = pages;
+                        this.highlights = highlights;
                         resolve();
                     });
                 });
@@ -79,16 +77,19 @@ export const useMainStore = defineStore({
         },
         deleteHighlight(id) {
             return new Promise((resolve, reject) => {
-                chrome.storage.local.get(["pages"], (res) => {
+                chrome.storage.local.get(["pages", "highlights"], (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                     let pages = res.pages;
+                    const highlights = res.highlights;
                     const page = pages.find((page) => page.url === this.url || page.wayback.url === this.url);
                     if (!page) return reject(new Error("No highlights exist for this page, therefore you cannot delete a highlight."));
-                    page.highlights = page.highlights.filter((highlight) => highlight.id !== id);
+                    page.highlights = page.highlights.filter((highlight) => highlight !== id);
+                    delete highlights[id];
                     if (page.highlights.length === 0) pages = pages.filter((p) => p.url !== this.url && p.wayback.url !== this.url);
-                    chrome.storage.local.set({ pages }, () => {
+                    chrome.storage.local.set({ pages, highlights }, () => {
                         if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                         this.pages = pages;
+                        this.highlights = highlights;
                         resolve();
                     });
                 });
@@ -118,16 +119,14 @@ export const useMainStore = defineStore({
         },
         saveNote(noteText, id) {
             return new Promise((resolve, reject) => {
-                chrome.storage.local.get(["pages"], async (res) => {
+                chrome.storage.local.get(["highlights"], async (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
-                    const pages = res.pages;
-                    let page = pages.find((page) => page.url === this.url || page.wayback.url === this.url);
-                    if (!page) return reject(new Error("No highlights exist for this page, therefore you cannot add a note."));
-                    const highlight = page.highlights.find((highlight) => highlight.id === id);
-                    highlight.notes = noteText;
-                    chrome.storage.local.set({ pages }, () => {
+                    const highlights = res.highlights;
+                    if (!highlights[id]) return reject(new Error("The highlight does not exist, therefore you cannot add a note."));
+                    highlights[id].notes = noteText;
+                    chrome.storage.local.set({ highlights }, () => {
                         if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
-                        this.pages = pages;
+                        this.highlights = highlights;
                         resolve();
                     });
                 });

@@ -1,6 +1,7 @@
 chrome.runtime.onInstalled.addListener((details) => {
     chrome.storage.local.set({
         pages: [],
+        highlights: {},
         categories: ["Apples", "Bananas", "Pears"],
         colors: [
             { light: "#9CD4BB", dark: "#920799", label: "" },

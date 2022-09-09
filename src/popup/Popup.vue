@@ -28,23 +28,26 @@ const darkMode = ref(false);
 const highlightsPerCategory = ref(new Map());
 
 onMounted(() => {
-  chrome.storage.local.get(["pages"], (res) => {
+  chrome.storage.local.get(["pages", "highlights"], (res) => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       var url = tabs[0].url;
       const index = res.pages.findIndex((el) => el.url === url);
       if (index >= 0) {
         darkMode.value = res.pages[index].darkMode ?? userPrefersDarkMode();
-        res.pages[index].highlights.forEach((highlight) => {
+        res.pages[index].highlights.forEach((highlightId) => {
           const categoryValue = highlightsPerCategory.value.get(
-            highlight.category
+            res.highlights[highlightId].category
           );
           if (categoryValue) {
-            highlightsPerCategory.value.set(highlight.category, [
-              ...categoryValue,
-              highlight,
-            ]);
+            highlightsPerCategory.value.set(
+              res.highlights[highlightId].category,
+              [...categoryValue, res.highlights[highlightId]]
+            );
           } else {
-            highlightsPerCategory.value.set(highlight.category, [highlight]);
+            highlightsPerCategory.value.set(
+              res.highlights[highlightId].category,
+              [res.highlights[highlightId]]
+            );
           }
         });
       } else {
