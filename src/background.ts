@@ -2,8 +2,12 @@ chrome.runtime.onInstalled.addListener((details) => {
     chrome.storage.local.set({
         pages: [],
         categories: ["Apples", "Bananas", "Pears"],
-        lightColors: ["#9CD4BB", "#B6B297", "#C4AED4", "#F3CD8E"],
-        darkColors: ["#920799", "#091ea7", "#1f6520", "#8b1f1f"],
+        colors: [
+            { light: "#9CD4BB", dark: "#920799", label: "" },
+            { light: "#B6B297", dark: "#091ea7", label: "" },
+            { light: "#C4AED4", dark: "#1f6520", label: "" },
+            { light: "#F3CD8E", dark: "#8b1f1f", label: "" },
+        ],
         hideFloatingMenu: false,
     });
     chrome.contextMenus.create({

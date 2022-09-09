@@ -21,28 +21,20 @@
   </div>
   <h2>Default colors</h2>
   <h3>Light mode colors</h3>
-  <div
-    class="color-container"
-    v-for="(color, index) in lightColors"
-    :key="color"
-  >
+  <div class="color-container" v-for="(color, index) in colors" :key="color">
     <input
       type="color"
       class="color"
-      :value="color"
+      :value="color.light"
       @change="(evt) => saveLightColors(evt, index)"
     />
   </div>
   <h3>Dark mode colors</h3>
-  <div
-    class="color-container"
-    v-for="(color, index) in darkColors"
-    :key="color"
-  >
+  <div class="color-container" v-for="(color, index) in colors" :key="color">
     <input
       type="color"
       class="color"
-      :value="color"
+      :value="color.dark"
       @change="(evt) => saveDarkColors(evt, index)"
     />
   </div>
@@ -56,8 +48,7 @@
 import { onMounted, ref, watch } from "vue";
 import { TrashIcon } from "@heroicons/vue/solid";
 import Switch from "./Switch.vue";
-const lightColors = ref([]);
-const darkColors = ref([]);
+const colors = ref([]);
 const categories = ref([]);
 const hideFloatingMenu = ref(false);
 const newCategoryName = ref("");
@@ -66,10 +57,9 @@ let pages = [];
 onMounted(() => {
   setPreferredColorTheme();
   chrome.storage.local.get(
-    ["lightColors", "darkColors", "categories", "hideFloatingMenu", "pages"],
+    ["colors", "categories", "hideFloatingMenu", "pages"],
     (res) => {
-      lightColors.value = res.lightColors;
-      darkColors.value = res.darkColors;
+      colors.value = res.colors;
       categories.value = res.categories;
       hideFloatingMenu.value = res.hideFloatingMenu;
       pages = res.pages;
@@ -126,16 +116,16 @@ function setPreferredColorTheme() {
 }
 
 function saveLightColors(evt, index) {
-  lightColors.value[index] = evt.target.value;
+  colors.value[index].light = evt.target.value;
   chrome.storage.local.set({
-    lightColors: lightColors.value,
+    colors: [...colors.value],
   });
 }
 
 function saveDarkColors(evt, index) {
-  darkColors.value[index] = evt.target.value;
+  colors.value[index].dark = evt.target.value;
   chrome.storage.local.set({
-    darkColors: darkColors.value,
+    colors: [...colors.value],
   });
 }
 </script>

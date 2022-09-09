@@ -5,8 +5,7 @@ export const useMainStore = defineStore({
     state: () => ({
         pages: [],
         categories: [],
-        lightColors: [],
-        darkColors: [],
+        colors: [],
         hideFloatingMenu: false,
         url: window.location.href,
     }),
@@ -14,18 +13,14 @@ export const useMainStore = defineStore({
         getPage() {
             return this.pages.find((page) => page.url === this.url || page.wayback.url === this.url);
         },
-        todoEmpty() {
-            return this.todos.length <= 0;
-        },
     },
     actions: {
         getAllStorageData() {
             return new Promise((resolve, reject) => {
-                chrome.storage.local.get(["pages", "lightColors", "darkColors", "categories", "hideFloatingMenu"], (res) => {
+                chrome.storage.local.get(["pages", "colors", "categories", "hideFloatingMenu"], (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                     this.pages = res.pages;
-                    this.lightColors = res.lightColors;
-                    this.darkColors = res.darkColors;
+                    this.colors = res.colors;
                     this.categories = res.categories;
                     this.hideFloatingMenu = res.hideFloatingMenu;
                     resolve();
@@ -41,7 +36,7 @@ export const useMainStore = defineStore({
                 });
             });
         },
-        addHighlight(darkMode, id, text, rInfo, category, color) {
+        addHighlight(darkMode, id, text, rInfo, category, colorIndex) {
             return new Promise((resolve, reject) => {
                 chrome.storage.local.get(["pages"], async (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
@@ -59,7 +54,7 @@ export const useMainStore = defineStore({
                     page.highlights.push({
                         id,
                         category,
-                        color,
+                        colorIndex,
                         text,
                         rInfo,
                     });

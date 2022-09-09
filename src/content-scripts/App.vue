@@ -67,14 +67,9 @@ import HighlighterPopup from "./HighlighterPopup.vue";
 import FloatingMenu from "./FloatingMenu.vue";
 
 const store = useMainStore();
-const {
-  pages,
-  categories,
-  lightColors,
-  darkColors,
-  hideFloatingMenu,
-  getPage,
-} = storeToRefs(useMainStore());
+const { pages, categories, colors, hideFloatingMenu, getPage } = storeToRefs(
+  useMainStore()
+);
 
 const highlightTemplate = ref(null);
 const highlighterPopupPosition = ref({ display: "none" });
@@ -84,7 +79,6 @@ const usedCategories = ref([]);
 let focusModeColorIndex = 0;
 let focusModeCategory = "";
 let currentColors = [];
-let colors = { lightMode: [], darkMode: [] };
 const darkMode = ref(false);
 const editors = {};
 
@@ -122,11 +116,12 @@ onMounted(() => {
 watch(darkMode, (newDarkModeValue) => {
   if (newDarkModeValue) {
     document.documentElement.className = "uhighlight-dark-mode";
-    currentColors = colors.darkMode;
+    currentColors = colors.value.map((c) => c.dark);
   } else {
     document.documentElement.className = "uhighlight-light-mode";
-    currentColors = colors.lightMode;
+    currentColors = colors.value.map((c) => c.light);
   }
+  updateHighlightColors();
 });
 
 watch(pages, () => {
@@ -142,6 +137,9 @@ async function loadData(addHighlights) {
     darkMode.value = userPrefersDarkMode();
   } else {
     darkMode.value = page.darkMode ?? userPrefersDarkMode();
+    currentColors = colors.value.map((c) =>
+      darkMode.value ? c.dark : c.light
+    );
     if (typeof addHighlights === "boolean" && addHighlights) {
       let error = false;
       page.highlights.forEach((highlight) => {
@@ -151,7 +149,7 @@ async function loadData(addHighlights) {
             range,
             highlight.id,
             highlight.category,
-            highlight.color,
+            highlight.colorIndex,
             highlight.notes
           );
         } catch (e) {
@@ -175,10 +173,10 @@ async function loadData(addHighlights) {
             "Some highlights failed to load, the website might have changed since the last time you visited but you can still look at your highlights and notes in the popup."
           );
       }
+    } else {
+      updateHighlightColors();
     }
   }
-  colors = { lightMode: lightColors.value, darkMode: darkColors.value };
-  currentColors = darkMode.value ? colors.darkMode : colors.lightMode;
 }
 
 function addCategory() {
@@ -222,6 +220,17 @@ function updateVisibleCategories(activeCategories) {
   });
 }
 
+function updateHighlightColors() {
+  currentColors.forEach((color, index) => {
+    const highlights = document.getElementsByClassName(
+      `uhighlight-color-${index}`
+    );
+    for (let highlight of highlights) {
+      highlight.style.backgroundColor = color;
+    }
+  });
+}
+
 function setHighlighterPopupPosition() {
   const rangeBounds = window
     .getSelection()
@@ -243,10 +252,11 @@ function getSelectedText() {
   return window.getSelection().toString();
 }
 
-function highlightRange(range, id, category, color, notes) {
+function highlightRange(range, id, category, colorIndex, notes) {
   const clone = highlightTemplate.value.cloneNode(true);
   clone.classList.add("uhighlight-" + category);
-  clone.style.backgroundColor = color;
+  clone.classList.add("uhighlight-color-" + colorIndex);
+  clone.style.backgroundColor = currentColors[colorIndex];
   clone.style.display = "inline";
   clone
     .getElementsByClassName("uhighlight-delete-btn")[0]
@@ -344,9 +354,9 @@ function highlightSelection(colorIndex, category) {
       userSelection.toString(),
       rInfo,
       category,
-      currentColors[colorIndex]
+      colorIndex
     );
-    highlightRange(range, id, category, currentColors[colorIndex], null);
+    highlightRange(range, id, category, colorIndex, null);
     removeSelection();
   }
 }
