@@ -63,6 +63,7 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { useMainStore } from "./store.js";
 import { storeToRefs } from "pinia";
+import { v4 as uuidv4 } from "uuid";
 import HighlighterPopup from "./HighlighterPopup.vue";
 import FloatingMenu from "./FloatingMenu.vue";
 
@@ -185,7 +186,7 @@ function addCategory() {
 }
 
 function addNote(evt) {
-  if (evt.target.classList.contains("uhighlight-delete-btn")) return;
+  if (evt.target.closest(".uhighlight-delete-btn")) return;
   disabledEventPropagation(evt);
   const input = evt.target.getElementsByClassName("uhighlight-note-input")[0];
   evt.target.getElementsByClassName(
@@ -207,11 +208,9 @@ function userPrefersDarkMode() {
 }
 
 function updateVisibleCategories(activeCategories) {
-  categories.value.forEach((category) => {
-    let highlightElements = document.getElementsByClassName(
-      "uhighlight-" + category
-    );
-    if (activeCategories.includes(category)) {
+  for (const id of Object.keys(categories.value)) {
+    let highlightElements = document.getElementsByClassName("uhighlight-" + id);
+    if (activeCategories.includes(id)) {
       for (let highlight of highlightElements) {
         highlight.classList.remove("uhighlight-hidden");
       }
@@ -220,7 +219,7 @@ function updateVisibleCategories(activeCategories) {
         highlight.classList.add("uhighlight-hidden");
       }
     }
-  });
+  }
 }
 
 function updateHighlightColors() {
@@ -255,9 +254,9 @@ function getSelectedText() {
   return window.getSelection().toString();
 }
 
-function highlightRange(range, id, category, colorIndex, notes) {
+function highlightRange(range, id, categoryId, colorIndex, notes) {
   const clone = highlightTemplate.value.cloneNode(true);
-  clone.classList.add("uhighlight-" + category);
+  clone.classList.add("uhighlight-" + categoryId);
   clone.classList.add("uhighlight-color-" + colorIndex);
   clone.style.backgroundColor = currentColors[colorIndex];
   clone.style.display = "inline";
@@ -293,7 +292,7 @@ function setupNoteInput(input, id, notes) {
 
 function deleteHighlight(evt) {
   const element = evt.target.parentElement;
-  let id = parseInt(element.id.substring(11));
+  let id = element.id.substring(11);
   //remove delete button
   element.removeChild(element.childNodes[0]);
   element.outerHTML = element.innerHTML;
@@ -302,7 +301,7 @@ function deleteHighlight(evt) {
   store.deleteHighlight(id);
 }
 
-function highlightSelection(colorIndex, category) {
+function highlightSelection(colorIndex, categoryId) {
   var userSelection = window.getSelection();
   for (let i = 0; i < userSelection.rangeCount; i++) {
     let range = userSelection.getRangeAt(i);
@@ -348,18 +347,18 @@ function highlightSelection(colorIndex, category) {
       endTagName: endTagName,
       endHTML: endHTML,
     };
-    var id = Date.now();
-    if (!usedCategories.value.find((cat) => cat === category))
-      usedCategories.value = [...usedCategories.value, category];
+    var id = uuidv4();
+    if (!usedCategories.value.find((cat) => cat === categoryId))
+      usedCategories.value = [...usedCategories.value, categoryId];
     store.addHighlight(
       darkMode.value,
       id,
       userSelection.toString(),
       rInfo,
-      category,
+      categoryId,
       colorIndex
     );
-    highlightRange(range, id, category, colorIndex, null);
+    highlightRange(range, id, categoryId, colorIndex, null);
     removeSelection();
   }
 }

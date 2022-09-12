@@ -6,8 +6,8 @@
       name="categories"
       id="categories"
     >
-      <option v-for="category in categories" :key="category">
-        {{ category }}
+      <option v-for="(value, id) in categories" :value="id" :key="id">
+        {{ value }}
       </option>
     </select>
     <button class="categories-btn" @click="$emit('addCategory')">
@@ -32,9 +32,9 @@ const updateModelValue = (event) => {
 watch(
   () => props.categories,
   (newCategories) => {
-    if (newCategories.length > 0) {
-      selectedCategory.value = newCategories[0];
-      emit("update:modelValue", newCategories[0]);
+    if (Object.keys(newCategories).length > 0) {
+      selectedCategory.value = Object.keys(newCategories)[0];
+      emit("update:modelValue", Object.keys(newCategories)[0]);
     }
   }
 );

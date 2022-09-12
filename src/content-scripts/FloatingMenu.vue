@@ -12,15 +12,15 @@
 
       <h3 class="no-highlight highlights-heading">Highlights</h3>
       <div id="categories">
-        <div v-for="category in usedCategories" :key="category">
+        <div v-for="id in usedCategories" :key="id">
           <input
-            :id="category"
+            :id="id"
             type="checkbox"
-            :name="category"
+            :name="categories[id]"
             checked
             @change="categoryClicked"
           />
-          <label class="no-highlight" :for="category">{{ category }}</label>
+          <label class="no-highlight" :for="id">{{ categories[id] }}</label>
         </div>
       </div>
       <div class="focus-container">

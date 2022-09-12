@@ -29,16 +29,7 @@ export const useMainStore = defineStore({
                 });
             });
         },
-        setPages(pages) {
-            return new Promise((resolve, reject) => {
-                chrome.storage.local.set({ pages }, () => {
-                    if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
-                    this.pages = pages;
-                    resolve();
-                });
-            });
-        },
-        addHighlight(darkMode, id, text, rInfo, category, colorIndex) {
+        addHighlight(darkMode, id, text, rInfo, categoryId, colorIndex) {
             return new Promise((resolve, reject) => {
                 chrome.storage.local.get(["pages", "highlights"], async (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
@@ -55,7 +46,7 @@ export const useMainStore = defineStore({
                     }
                     page.darkMode = darkMode;
                     page.highlights.push(id);
-                    highlights[id] = { category, colorIndex, text, rInfo };
+                    highlights[id] = { category: categoryId, colorIndex, text, rInfo };
                     try {
                         const response = await fetch(`http://archive.org/wayback/available?url=${window.location.href}`);
                         const data = await response.json();

@@ -16,6 +16,7 @@
     "rollup-plugin-alias": "^2.2.0",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-import-css": "^3.0.3",
+    "uuid": "^9.0.0",
     "vue": "^3.0.4",
     "webextension-polyfill": "^0.7.0",
     "webextension-polyfill-ts": "^0.22.0"

@@ -4,11 +4,11 @@
     <h2>Manage Categories</h2>
     <div
       class="category-item"
-      :id="category"
-      v-for="category in categories"
-      :key="category"
+      :id="id"
+      v-for="(value, id) in categories"
+      :key="id"
     >
-      {{ category }}
+      {{ value }}
       <TrashIcon class="category-delete" @click="deleteCategory" />
     </div>
     <input
@@ -46,67 +46,48 @@
 
 <script setup>
 import { onMounted, ref, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { useOptionsStore } from "./store.js";
 import { TrashIcon } from "@heroicons/vue/solid";
 import Switch from "./Switch.vue";
-const colors = ref([]);
-const categories = ref([]);
-const hideFloatingMenu = ref(false);
+
+const store = useOptionsStore();
+const { pages, highlights, categories, colors, hideFloatingMenu, getPage } =
+  storeToRefs(useOptionsStore());
+
 const newCategoryName = ref("");
-let pages = [];
 
 onMounted(() => {
   setPreferredColorTheme();
-  chrome.storage.local.get(
-    ["colors", "categories", "hideFloatingMenu", "pages"],
-    (res) => {
-      colors.value = res.colors;
-      categories.value = res.categories;
-      hideFloatingMenu.value = res.hideFloatingMenu;
-      pages = res.pages;
-    }
-  );
+  store.getAllStorageData();
 });
 
 watch(hideFloatingMenu, (newValue) => {
-  chrome.storage.local.set({
-    hideFloatingMenu: newValue,
-  });
+  store.updateHideFloatingMenu(newValue);
 });
 function addNewCategory() {
-  if (!categories.value.includes(newCategoryName.value)) {
-    categories.value.push(newCategoryName.value);
-    chrome.storage.local.set({
-      categories: [...categories.value],
-    });
-  }
+  store.addCategory(newCategoryName.value);
+  newCategoryName.value = "";
 }
 
 function deleteCategory(evt) {
-  const category = evt.target.parentElement.classList.contains("category-item")
+  const categoryId = evt.target.parentElement.classList.contains(
+    "category-item"
+  )
     ? evt.target.parentElement.id
     : evt.target.parentElement.parentElement.id;
   let categoryHighlightCount = 0;
-  pages.forEach((page) => {
-    categoryHighlightCount += page.highlights.filter(
-      (el) => el.category === category
-    ).length;
-  });
+  highlights.value.forEach(
+    (highlight) =>
+      (categoryHighlightCount += highlight.category === categoryId ? 1 : 0)
+  );
 
   if (
     window.confirm(
-      `Do you really want to delete ${category}? There are ${categoryHighlightCount} highlights in this category that will be deleted as well!`
+      `Do you really want to delete ${categories.value[categoryId]}? There are ${categoryHighlightCount} highlights in this category that will be deleted as well!`
     )
   ) {
-    pages.forEach((page) => {
-      page.highlights = page.highlights.filter(
-        (el) => el.category !== category
-      );
-    });
-    categories.value = categories.value.filter((c) => c !== category);
-    chrome.storage.local.set({
-      categories: [...categories.value],
-      pages,
-    });
+    store.deleteCategory(categoryId);
   }
 }
 
