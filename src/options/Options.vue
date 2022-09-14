@@ -77,10 +77,9 @@ function deleteCategory(evt) {
     ? evt.target.parentElement.id
     : evt.target.parentElement.parentElement.id;
   let categoryHighlightCount = 0;
-  highlights.value.forEach(
-    (highlight) =>
-      (categoryHighlightCount += highlight.category === categoryId ? 1 : 0)
-  );
+  for (const highlight of Object.values(highlights.value)) {
+    if (highlight.category === categoryId) categoryHighlightCount++;
+  }
 
   if (
     window.confirm(

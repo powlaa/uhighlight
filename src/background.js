@@ -1,8 +1,10 @@
+import { v4 as uuidv4 } from "uuid";
+
 chrome.runtime.onInstalled.addListener((details) => {
     chrome.storage.local.set({
         pages: [],
         highlights: {},
-        categories: ["Apples", "Bananas", "Pears"],
+        categories: { [uuidv4()]: "Apples", [uuidv4()]: "Bananas", [uuidv4()]: "Pears" },
         colors: [
             { light: "#9CD4BB", dark: "#920799", label: "" },
             { light: "#B6B297", dark: "#091ea7", label: "" },

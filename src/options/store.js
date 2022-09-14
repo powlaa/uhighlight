@@ -6,7 +6,7 @@ export const useOptionsStore = defineStore({
     state: () => ({
         pages: [],
         highlights: {},
-        categories: [],
+        categories: {},
         colors: [],
         hideFloatingMenu: false,
         url: window.location.href,
@@ -60,7 +60,7 @@ export const useOptionsStore = defineStore({
                     const pages = res.pages;
                     const highlights = res.highlights;
                     const categories = res.categories;
-                    pages.value.forEach((page) => {
+                    pages.forEach((page) => {
                         page.highlights = page.highlights.filter((highlightId) => {
                             if (highlights[highlightId].category === id) {
                                 delete highlights[id];
