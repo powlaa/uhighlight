@@ -295,8 +295,8 @@ function setupNoteInput(input, id, notes) {
 }
 
 function deleteHighlight(evt) {
-  const element = evt.target.parentElement;
-  let id = element.id.substring(11);
+  const element = evt.target.closest(".uhighlight");
+  const id = element.id.substring(11);
   //remove delete button
   element.removeChild(element.childNodes[0]);
   element.outerHTML = element.innerHTML;
