@@ -1,39 +1,48 @@
 <template>
-  <div :class="{ hidden: hidden, 'floating-menu': true }" v-show="visible">
-    <div class="toggle-icon" @click="hidden = !hidden">
+  <div
+    :class="{ 'uhighlight-hidden': hidden, 'uhighlight-floating-menu': true }"
+    v-show="visible"
+  >
+    <div class="uhighlight-toggle-icon" @click="hidden = !hidden">
       <ChevronRightIcon v-show="!hidden" />
       <ChevronLeftIcon v-show="hidden" />
     </div>
     <div v-show="!hidden">
-      <div class="dark-mode-icon" @click="$emit('darkModeChanged', !darkMode)">
+      <div
+        class="uhighlight-dark-mode-icon"
+        @click="$emit('darkModeChanged', !darkMode)"
+      >
         <SunIcon v-show="darkMode" />
         <MoonIcon v-show="!darkMode" />
       </div>
 
-      <h3 class="no-highlight highlights-heading">Highlights</h3>
+      <h3 class="no-highlight uhighlight-highlights-heading">Highlights</h3>
       <div id="categories">
         <div v-for="id in usedCategories" :key="id">
           <input
             :id="id"
+            class="uhighlight-checkbox"
             type="checkbox"
             :name="categories[id]"
             checked
             @change="categoryClicked"
           />
-          <label class="no-highlight" :for="id">{{ categories[id] }}</label>
+          <label class="no-highlight uhighlight-checkbox-label" :for="id">{{
+            categories[id]
+          }}</label>
         </div>
       </div>
-      <div class="focus-container">
-        <label class="switch no-highlight">
+      <div class="uhighlight-focus-container">
+        <label class="uhighlight-switch no-highlight">
           <input
             type="checkbox"
             id="focus-mode"
             v-model="focus"
             @change="$emit('update:focus', focus)"
           />
-          <span class="slider round"></span>
+          <span class="uhighlight-slider round"></span>
         </label>
-        <div v-show="focus" class="focus-options">
+        <div v-show="focus" class="uhighlight-focus-options">
           <ColorChoice
             :colors="colors"
             :select="true"
@@ -118,98 +127,115 @@ function categoryClicked(evt) {
   -ms-user-select: none !important;
   user-select: none !important;
 }
-.floating-menu {
+.uhighlight-floating-menu,
+.uhighlight-highlights-heading,
+.uhighlight-focus-container,
+.uhighlight-focus-options {
   background-color: var(--uhighlight-background-color-primary) !important;
   color: var(--uhighlight-text-primary-color) !important;
+  font-family: var(--uhighlight-font-family) !important;
+}
+.uhighlight-floating-menu {
   position: fixed !important;
   top: 20px !important;
   right: 20px !important;
-  font-size: 1em !important;
   padding: 10px !important;
   border-radius: var(--uhighlight-border-radius) !important;
-  box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.2);
-  z-index: 2147483647;
-  transition: border-radius 0.2s, right 0.2s;
-  transition-timing-function: ease-in;
+  box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.2) !important;
+  z-index: 2147483647 !important;
+  transition: border-radius 0.2s, right 0.2s !important;
+  transition-timing-function: ease-in !important;
+  font-size: 16px !important;
+  font-weight: normal !important;
 }
-.hidden.floating-menu {
+.uhighlight-hidden.uhighlight-floating-menu {
   right: 0px !important;
   width: 20px !important;
   height: 60px !important;
+  padding: 0px !important;
   border-radius: 10px 0 0 10px !important;
 }
-.dark-mode-icon {
-  position: absolute;
+.uhighlight-dark-mode-icon {
+  position: absolute !important;
   height: 20px !important;
   width: 20px !important;
   top: 5px !important;
   right: 5px !important;
 }
-.toggle-icon {
-  position: absolute;
+.uhighlight-toggle-icon {
+  position: absolute !important;
   height: 20px !important;
   width: 20px !important;
   top: 0 !important;
   bottom: 0 !important;
-  margin-top: auto;
-  margin-bottom: auto;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
   right: 0 !important;
 }
-.highlights-heading {
+.uhighlight-highlights-heading {
   margin: 0px 20px 3px 0 !important;
+  font-size: 24px !important;
+  font-weight: bold !important;
 }
-.focus-container {
-  display: inline-block;
-  margin-top: 10px;
+.uhighlight-focus-container {
+  display: inline-block !important;
+  margin-top: 10px !important;
   width: 100% !important;
 }
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 20px;
+.uhighlight-checkbox {
+  accent-color: var(--uhighlight-accent-color-secondary) !important;
 }
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+.uhighlight-checkbox-label {
+  margin: 0 0 0 10px !important;
+  font-weight: normal !important;
 }
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-  border-radius: 34px;
+.uhighlight-switch {
+  position: relative !important;
+  display: inline-block !important;
+  width: 40px !important;
+  height: 20px !important;
 }
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-  border-radius: 50%;
+.uhighlight-switch input {
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
 }
-input:checked + .slider {
-  background-color: #2196f3;
+.uhighlight-slider {
+  position: absolute !important;
+  cursor: pointer !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: #ccc !important;
+  -webkit-transition: 0.4s !important;
+  transition: 0.4s !important;
+  border-radius: 34px !important;
 }
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
+.uhighlight-slider:before {
+  position: absolute !important;
+  content: "" !important;
+  height: 16px !important;
+  width: 16px !important;
+  left: 2px !important;
+  bottom: 2px !important;
+  background-color: white !important;
+  -webkit-transition: 0.4s !important;
+  transition: 0.4s !important;
+  border-radius: 50% !important;
 }
-input:checked + .slider:before {
-  -webkit-transform: translateX(20px);
-  -ms-transform: translateX(20px);
-  transform: translateX(20px);
+input:checked + .uhighlight-slider {
+  background-color: var(--uhighlight-accent-color-secondary) !important;
 }
-.focus-options {
-  padding-top: 5px;
+input:focus + .uhighlight-slider {
+  box-shadow: 0 0 1px var(--uhighlight-accent-color-secondary) !important;
+}
+input:checked + .uhighlight-slider:before {
+  -webkit-transform: translateX(20px) !important;
+  -ms-transform: translateX(20px) !important;
+  transform: translateX(20px) !important;
+}
+.uhighlight-focus-options {
+  padding-top: 5px !important;
 }
 </style>

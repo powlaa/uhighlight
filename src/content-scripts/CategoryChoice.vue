@@ -1,17 +1,17 @@
 <template>
-  <div id="categories-container">
+  <div id="uhighlight-categories-container">
     <select
       v-model="selectedCategory"
       @change="updateModelValue"
       name="categories"
-      id="categories"
+      id="uhighlight-categories"
     >
       <option v-for="(value, id) in categories" :value="id" :key="id">
         {{ value }}
       </option>
     </select>
-    <button class="categories-btn" @click="$emit('addCategory')">
-      <PlusIcon class="categories-add" />
+    <button class="uhighlight-categories-btn" @click="$emit('addCategory')">
+      <PlusIcon class="uhighlight-categories-add" />
     </button>
   </div>
 </template>
@@ -41,27 +41,33 @@ watch(
 </script>
 
 <style scoped>
-#categories-container {
-  display: flex;
+*:focus {
+  outline: none;
 }
-#categories {
-  width: 100px;
-  background-color: var(--uhighlight-background-color-primary);
-  color: var(--uhighlight-text-primary-color);
+#uhighlight-categories-container {
+  display: flex !important;
 }
-.categories-btn {
-  background-color: var(--uhighlight-background-color-primary);
-  border: none;
-  height: 30px;
-  width: 30px;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#uhighlight-categories {
+  width: 100px !important;
+  background-color: var(--uhighlight-background-color-primary) !important;
+  color: var(--uhighlight-text-primary-color) !important;
+  border-radius: 5px !important;
+  font-family: var(--uhighlight-font-family) !important;
+  font-size: 16px !important;
 }
-.categories-add {
-  color: var(--uhighlight-text-primary-color);
-  height: 21px;
-  width: 21px;
+.uhighlight-categories-btn {
+  background-color: var(--uhighlight-background-color-primary) !important;
+  border: none !important;
+  height: 30px !important;
+  width: 30px !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.uhighlight-categories-add {
+  color: var(--uhighlight-text-primary-color) !important;
+  height: 21px !important;
+  width: 21px !important;
 }
 </style>

@@ -1,11 +1,11 @@
 <template>
-  <div id="colors">
+  <div id="uhighlight-colors">
     <button
       v-for="(color, index) in colors"
       :key="color"
       :class="{
-        'color-btn': true,
-        'selected-color': select && index === selectedIndex,
+        'uhighlight-color-btn': true,
+        'uhighlighit-selected-color': select && index === selectedIndex,
       }"
       :id="`color${index}`"
       :style="{ backgroundColor: color }"
@@ -30,19 +30,19 @@ function colorClicked(colorIndex) {
 </script>
 
 <style scoped>
-#colors {
+#uhighlight-colors {
   align-items: center;
   justify-content: space-around;
   display: flex;
   padding-bottom: 5px;
 }
-.color-btn {
+.uhighlight-color-btn {
   border-radius: 10px;
   border: none;
   width: 20px;
   height: 20px;
 }
-.selected-color {
+.uhighlighit-selected-color {
   border: 1px solid black !important;
 }
 </style>

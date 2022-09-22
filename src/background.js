@@ -8,7 +8,7 @@ chrome.runtime.onInstalled.addListener((details) => {
         colors: [
             { light: "#9CD4BB", dark: "#920799", label: "" },
             { light: "#B6B297", dark: "#091ea7", label: "" },
-            { light: "#C4AED4", dark: "#1f6520", label: "" },
+            { light: "#88c3cd", dark: "#1f6520", label: "" },
             { light: "#F3CD8E", dark: "#8b1f1f", label: "" },
         ],
         hideFloatingMenu: false,

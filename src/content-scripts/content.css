@@ -2,7 +2,9 @@
     --uhighlight-background-color-primary: #e8e5e5;
     --uhighlight-background-color-secondary: #fafafa;
     --uhighlight-accent-color: #cacaca;
+    --uhighlight-accent-color-secondary: #c29ddd;
     --uhighlight-text-primary-color: #222;
+    --uhighlight-font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
 
     --uhighlight-border-radius: 10px;
 }
@@ -47,6 +49,7 @@
     background-color: var(--uhighlight-background-color-primary);
     color: var(--uhighlight-text-primary-color);
     font-size: 1em;
+    font-family: var(--uhighlight-font-family);
     z-index: 1;
 }
 .uhighlight:hover > .uhighlight-delete-btn,
@@ -68,7 +71,11 @@
     border-radius: var(--uhighlight-border-radius);
     background-color: var(--uhighlight-background-color-primary);
     color: var(--uhighlight-text-primary-color);
+    font-family: var(--uhighlight-font-family);
     z-index: 1;
+}
+.uhighlight-note-input > *:focus {
+    outline: none;
 }
 
 /* tip tap styling */
