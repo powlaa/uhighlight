@@ -2,7 +2,7 @@
   <div v-for="[category, highlights] in highlightsPerCategory" :key="category">
     <AccordionCollapse>
       <template v-slot:title>
-        <span>{{ category }}</span>
+        <span>{{ categories[category] }}</span>
       </template>
       <template v-slot:content>
         <div
@@ -26,30 +26,33 @@ import AccordionCollapse from "./AccordionCollapse.vue";
 
 const darkMode = ref(false);
 const highlightsPerCategory = ref(new Map());
+let categories = {};
 
 onMounted(() => {
-  chrome.storage.local.get(["pages", "highlights"], (res) => {
+  chrome.storage.local.get(["pages", "highlights", "categories"], (res) => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       var url = tabs[0].url;
-      const index = res.pages.findIndex((el) => el.url === url);
+      const index = res.pages.findIndex(
+        (el) => el.url === url || el.wayback.url === url
+      );
+      categories = res.categories;
       if (index >= 0) {
         darkMode.value = res.pages[index].darkMode ?? userPrefersDarkMode();
-        res.pages[index].highlights.forEach((highlightId) => {
-          const categoryValue = highlightsPerCategory.value.get(
-            res.highlights[highlightId].category
-          );
-          if (categoryValue) {
-            highlightsPerCategory.value.set(
-              res.highlights[highlightId].category,
-              [...categoryValue, res.highlights[highlightId]]
+        for (const highlight of Object.values(res.highlights)) {
+          if (highlight.page === res.pages[index].id) {
+            const categoryValue = highlightsPerCategory.value.get(
+              highlight.category
             );
-          } else {
-            highlightsPerCategory.value.set(
-              res.highlights[highlightId].category,
-              [res.highlights[highlightId]]
-            );
+            if (categoryValue) {
+              highlightsPerCategory.value.set(highlight.category, [
+                ...categoryValue,
+                highlight,
+              ]);
+            } else {
+              highlightsPerCategory.value.set(highlight.category, [highlight]);
+            }
           }
-        });
+        }
       } else {
         darkMode.value = userPrefersDarkMode();
       }

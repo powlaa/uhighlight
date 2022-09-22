@@ -1,18 +1,19 @@
 import { defineStore } from "pinia";
+import { v4 as uuidv4 } from "uuid";
 
 export const useMainStore = defineStore({
     id: "main",
     state: () => ({
         pages: [],
         highlights: {},
-        categories: [],
+        categories: {},
         colors: [],
         hideFloatingMenu: false,
         url: window.location.href,
     }),
     getters: {
         getPage() {
-            return this.pages.find((page) => page.url === this.url || page.wayback.url === this.url);
+            return this.pages.find((page) => page.url === this.url || page.wayback?.url === this.url);
         },
     },
     actions: {
@@ -38,15 +39,14 @@ export const useMainStore = defineStore({
                     let page = pages.find((page) => page.url === this.url || page.wayback.url === this.url);
                     if (!page) {
                         page = {
+                            id: uuidv4(),
                             url: this.url,
                             darkMode,
-                            highlights: [],
                         };
                         pages.push(page);
                     }
                     page.darkMode = darkMode;
-                    page.highlights.push(id);
-                    highlights[id] = { category: categoryId, colorIndex, text, rInfo };
+                    highlights[id] = { category: categoryId, colorIndex, text, rInfo, page: page.id };
                     try {
                         const response = await fetch(`http://archive.org/wayback/available?url=${window.location.href}`);
                         const data = await response.json();
@@ -74,9 +74,7 @@ export const useMainStore = defineStore({
                     const highlights = res.highlights;
                     const page = pages.find((page) => page.url === this.url || page.wayback.url === this.url);
                     if (!page) return reject(new Error("No highlights exist for this page, therefore you cannot delete a highlight."));
-                    page.highlights = page.highlights.filter((highlight) => highlight !== id);
                     delete highlights[id];
-                    if (page.highlights.length === 0) pages = pages.filter((p) => p.url !== this.url && p.wayback.url !== this.url);
                     chrome.storage.local.set({ pages, highlights }, () => {
                         if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                         this.pages = pages;

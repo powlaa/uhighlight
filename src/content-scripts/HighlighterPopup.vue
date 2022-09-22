@@ -42,7 +42,7 @@ watch(
   justify-content: center;
   padding: 5px 10px;
   position: fixed;
-  z-index: 9999;
+  z-index: 2147483647 !important;
   display: none;
 }
 </style>

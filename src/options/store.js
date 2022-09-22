@@ -57,25 +57,19 @@ export const useOptionsStore = defineStore({
             return new Promise((resolve, reject) => {
                 chrome.storage.local.get(["pages", "highlights", "categories"], (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
-                    const pages = res.pages;
                     const highlights = res.highlights;
                     const categories = res.categories;
-                    pages.forEach((page) => {
-                        page.highlights = page.highlights.filter((highlightId) => {
-                            if (highlights[highlightId].category === id) {
-                                delete highlights[id];
-                                return false;
-                            }
-                            return true;
-                        });
-                    });
+                    for (const [id, highlight] of Object.entries(highlights)) {
+                        if (highlight.category === id) {
+                            delete highlights[id];
+                        }
+                    }
                     delete categories[id];
 
-                    chrome.storage.local.set({ categories, highlights, pages }, () => {
+                    chrome.storage.local.set({ categories, highlights }, () => {
                         if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                         this.categories = categories;
                         this.highlights = highlights;
-                        this.pages = pages;
                         resolve();
                     });
                 });

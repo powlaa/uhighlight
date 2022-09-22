@@ -89,3 +89,7 @@
     content: " ";
     white-space: pre;
 }
+
+#wm-ip-base::shadow #wm-ipp {
+    z-index: 2147483646 !important;
+}

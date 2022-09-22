@@ -127,7 +127,9 @@ watch(darkMode, (newDarkModeValue) => {
 watch(highlights, () => {
   usedCategories.value = [
     ...new Set(
-      getPage.value?.highlights.map((id) => highlights.value[id].category)
+      Object.values(highlights.value)
+        .filter((h) => h.page === getPage.value.id)
+        .map((h) => h.category)
     ),
   ];
 });
@@ -144,21 +146,23 @@ async function loadData(addHighlights) {
     );
     if (typeof addHighlights === "boolean" && addHighlights) {
       let error = false;
-      page.highlights.forEach((highlightId) => {
-        try {
-          const range = buildRange(highlights.value[highlightId].rInfo);
-          highlightRange(
-            range,
-            highlightId,
-            highlights.value[highlightId].category,
-            highlights.value[highlightId].colorIndex,
-            highlights.value[highlightId].notes
-          );
-        } catch (e) {
-          error = true;
-          console.warn(e);
+      for (const [id, highlight] of Object.entries(highlights.value)) {
+        if (highlight.page === page.id) {
+          try {
+            const range = buildRange(highlight.rInfo);
+            highlightRange(
+              range,
+              id,
+              highlight.category,
+              highlight.colorIndex,
+              highlight.notes
+            );
+          } catch (e) {
+            error = true;
+            console.warn(e);
+          }
         }
-      });
+      }
       if (error) {
         if (page.wayback) {
           const year = +page.wayback.timestamp.substring(0, 4);
