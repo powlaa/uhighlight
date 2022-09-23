@@ -14,7 +14,7 @@
     <input
       v-model="newCategoryName"
       type="text"
-      class="category-input"
+      class="input"
       placeholder="New category"
     />
     <button class="category-btn" @click="addNewCategory">Add</button>
@@ -40,6 +40,8 @@
       </div>
       <input
         type="text"
+        class="input"
+        placeholder="Label"
         @input="(evt) => store.saveColorLabel(index, evt.target.value)"
       />
     </div>
@@ -125,6 +127,7 @@ input:focus {
 }
 .categories {
   padding: 5px;
+  width: 230px;
 }
 .category-item {
   font-size: 1em;
@@ -138,7 +141,7 @@ input:focus {
   height: 21px;
   width: 21px;
 }
-.category-input {
+.input {
   background-color: var(--uhighlight-background-color-primary);
   color: var(--uhighlight-text-primary-color);
   border: 1px solid var(--uhighlight-text-primary-color);

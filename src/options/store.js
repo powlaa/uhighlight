@@ -13,7 +13,7 @@ export const useOptionsStore = defineStore({
     }),
     getters: {
         getPage() {
-            return this.pages.find((page) => page.url === this.url || page.wayback.url === this.url);
+            return this.pages.find((page) => page.url === this.url || page.wayback?.url === this.url);
         },
     },
     actions: {

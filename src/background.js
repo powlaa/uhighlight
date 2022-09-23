@@ -4,25 +4,14 @@ chrome.runtime.onInstalled.addListener((details) => {
     chrome.storage.local.set({
         pages: [],
         highlights: {},
-        categories: { [uuidv4()]: "Apples", [uuidv4()]: "Bananas", [uuidv4()]: "Pears" },
+        categories: { [uuidv4()]: "JavaScript", [uuidv4()]: "Stores", [uuidv4()]: "Vue.js" },
         colors: [
-            { light: "#9CD4BB", dark: "#920799", label: "" },
-            { light: "#B6B297", dark: "#091ea7", label: "" },
+            { light: "#9CD4BB", dark: "#920799", label: "General" },
+            { light: "#B6B297", dark: "#091ea7", label: "Tips" },
             { light: "#88c3cd", dark: "#1f6520", label: "" },
             { light: "#F3CD8E", dark: "#8b1f1f", label: "" },
         ],
         hideFloatingMenu: false,
-    });
-    chrome.contextMenus.create({
-        title: "Highlight text",
-        id: "contextMenu1",
-        contexts: ["page", "selection"],
-    });
-    chrome.contextMenus.onClicked.addListener((evt) => {
-        if (evt.menuItemId === "contextMenu1") {
-            console.log(evt);
-            console.log(evt.selectionText);
-        }
     });
 });
 

@@ -13,7 +13,11 @@
           <div class="highlight">
             {{ highlight.text }}
           </div>
-          <div class="notes" v-html="highlight.notes"></div>
+          <div
+            class="notes"
+            v-show="highlight.notes"
+            v-html="highlight.notes"
+          ></div>
         </div>
       </template>
     </AccordionCollapse>
@@ -51,6 +55,7 @@ onMounted(() => {
             } else {
               highlightsPerCategory.value.set(highlight.category, [highlight]);
             }
+            console.log(highlightsPerCategory.value);
           }
         }
       } else {

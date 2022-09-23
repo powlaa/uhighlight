@@ -26,24 +26,20 @@ const selectedIndex = ref(0);
 
 onMounted(() => {
   window.addEventListener("keypress", (e) => {
-    if (
-      (e.keyCode < 49 || e.keyCode > 52) &&
-      (e.keyCode < 97 || e.keyCode > 100)
-    )
-      return;
     switch (true) {
-      case e.keyCode === 49 || e.keyCode === 97:
+      case e.key === "1" || e.key === "Numpad1":
         colorClicked(0);
         break;
-      case e.keyCode === 50 || e.keyCode === 98:
-        console.log("number 2");
+      case e.key === "2" || e.key === "Numpad2":
         colorClicked(1);
         break;
-      case e.keyCode === 51 || e.keyCode === 99:
+      case e.key === "3" || e.key === "Numpad3":
         colorClicked(2);
         break;
-      case e.keyCode === 52 || e.keyCode === 100:
+      case e.key === "4" || e.key === "Numpad4":
         colorClicked(3);
+        break;
+      default:
         break;
     }
   });

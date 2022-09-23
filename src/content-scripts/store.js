@@ -36,7 +36,7 @@ export const useMainStore = defineStore({
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                     const pages = res.pages;
                     const highlights = res.highlights;
-                    let page = pages.find((page) => page.url === this.url || page.wayback.url === this.url);
+                    let page = pages.find((page) => page.url === this.url || page.wayback?.url === this.url);
                     if (!page) {
                         page = {
                             id: uuidv4(),
@@ -72,7 +72,7 @@ export const useMainStore = defineStore({
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                     let pages = res.pages;
                     const highlights = res.highlights;
-                    const page = pages.find((page) => page.url === this.url || page.wayback.url === this.url);
+                    const page = pages.find((page) => page.url === this.url || page.wayback?.url === this.url);
                     if (!page) return reject(new Error("No highlights exist for this page, therefore you cannot delete a highlight."));
                     delete highlights[id];
                     chrome.storage.local.set({ pages, highlights }, () => {
@@ -89,7 +89,7 @@ export const useMainStore = defineStore({
                 chrome.storage.local.get(["pages"], async (res) => {
                     if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
                     const pages = res.pages;
-                    let page = pages.find((page) => page.url === this.url || page.wayback.url === this.url);
+                    let page = pages.find((page) => page.url === this.url || page.wayback?.url === this.url);
                     if (!page) {
                         page = {
                             url: this.url,

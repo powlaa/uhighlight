@@ -304,6 +304,7 @@ function deleteHighlight(evt) {
 
 function highlightSelection(colorIndex, categoryId) {
   var userSelection = window.getSelection();
+  if (userSelection.toString().length === 0) return;
   for (let i = 0; i < userSelection.rangeCount; i++) {
     let range = userSelection.getRangeAt(i);
     let startNode = range.startContainer;
