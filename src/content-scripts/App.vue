@@ -100,9 +100,9 @@ onMounted(() => {
   loadData(true);
   document.addEventListener("click", () => {
     if (getSelectedText().length > 0) {
-      if (focusMode.value)
+      if (focusMode.value) {
         highlightSelection(focusModeColorIndex, focusModeCategory);
-      else setHighlighterPopupPosition();
+      } else setHighlighterPopupPosition();
     }
   });
 
@@ -121,7 +121,6 @@ watch(darkMode, (newDarkModeValue) => {
 });
 
 watch(highlights, () => {
-  console.log(getPage.value);
   usedCategories.value = [
     ...new Set(
       Object.values(highlights.value)
