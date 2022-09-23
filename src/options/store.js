@@ -75,5 +75,23 @@ export const useOptionsStore = defineStore({
                 });
             });
         },
+        saveLightColor(index, value) {
+            this.colors[index].light = value;
+            chrome.storage.local.set({
+                colors: [...this.colors],
+            });
+        },
+        saveDarkColor(index, value) {
+            this.colors[index].dark = value;
+            chrome.storage.local.set({
+                colors: [...this.colors],
+            });
+        },
+        saveColorLabel(index, value) {
+            this.colors[index].label = value;
+            chrome.storage.local.set({
+                colors: [...this.colors],
+            });
+        },
     },
 });

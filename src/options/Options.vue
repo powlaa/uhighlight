@@ -19,24 +19,30 @@
     />
     <button class="category-btn" @click="addNewCategory">Add</button>
   </div>
-  <h2>Default colors</h2>
-  <h3>Light mode colors</h3>
-  <div class="color-container" v-for="(color, index) in colors" :key="color">
-    <input
-      type="color"
-      class="color"
-      :value="color.light"
-      @change="(evt) => saveLightColors(evt, index)"
-    />
-  </div>
-  <h3>Dark mode colors</h3>
-  <div class="color-container" v-for="(color, index) in colors" :key="color">
-    <input
-      type="color"
-      class="color"
-      :value="color.dark"
-      @change="(evt) => saveDarkColors(evt, index)"
-    />
+  <h2>Colors</h2>
+  <div class="colors-configuration">
+    <div class="colors" v-for="(color, index) in colors" :key="color">
+      <div class="color-container">
+        <input
+          type="color"
+          class="color"
+          :value="color.light"
+          @change="(evt) => store.saveLightColor(index, evt.target.value)"
+        />
+      </div>
+      <div class="color-container">
+        <input
+          type="color"
+          class="color"
+          :value="color.dark"
+          @change="(evt) => store.saveDarkColor(index, evt.target.value)"
+        />
+      </div>
+      <input
+        type="text"
+        @input="(evt) => store.saveColorLabel(index, evt.target.value)"
+      />
+    </div>
   </div>
   <h2>Floating Menu</h2>
   <Switch v-model="hideFloatingMenu"
@@ -94,20 +100,6 @@ function setPreferredColorTheme() {
   if (window.matchMedia("(prefers-color-scheme: dark)").matches)
     document.documentElement.className = "uhighlight-dark-mode";
 }
-
-function saveLightColors(evt, index) {
-  colors.value[index].light = evt.target.value;
-  chrome.storage.local.set({
-    colors: [...colors.value],
-  });
-}
-
-function saveDarkColors(evt, index) {
-  colors.value[index].dark = evt.target.value;
-  chrome.storage.local.set({
-    colors: [...colors.value],
-  });
-}
 </script>
 
 <style>
@@ -162,6 +154,14 @@ input:focus {
   height: 19.5px;
   padding: 0 5px;
   border-radius: 3px;
+}
+.colors-configuration {
+  display: flex;
+  flex-direction: column;
+}
+.colors {
+  display: flex;
+  margin-bottom: 5px;
 }
 .color-container {
   display: inline-block;

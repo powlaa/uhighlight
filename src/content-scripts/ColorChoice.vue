@@ -2,13 +2,14 @@
   <div id="uhighlight-colors">
     <button
       v-for="(color, index) in colors"
-      :key="color"
+      :key="darkMode ? color.dark : color.light"
       :class="{
         'uhighlight-color-btn': true,
         'uhighlighit-selected-color': select && index === selectedIndex,
       }"
       :id="`color${index}`"
-      :style="{ backgroundColor: color }"
+      :style="{ backgroundColor: darkMode ? color.dark : color.light }"
+      :title="color.label"
       @click="colorClicked(index)"
     ></button>
   </div>
@@ -18,7 +19,7 @@
 <script setup>
 import { ref } from "vue";
 
-const props = defineProps(["colors", "select"]);
+const props = defineProps(["colors", "select", "darkMode"]);
 const emit = defineEmits(["colorClicked"]);
 
 let selectedIndex = ref(0);

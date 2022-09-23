@@ -2,6 +2,7 @@
   <div id="highlighterPopup" ref="highlighterPopup">
     <ColorChoice
       :colors="colors"
+      :darkMode="darkMode"
       @colorClicked="(index) => $emit('addHighlight', index, selectedCategory)"
     >
     </ColorChoice>
@@ -18,7 +19,7 @@ import { ref, watch } from "vue";
 import ColorChoice from "./ColorChoice.vue";
 import CategoryChoice from "./CategoryChoice.vue";
 
-const props = defineProps(["colors", "categories", "position"]);
+const props = defineProps(["colors", "categories", "position", "darkMode"]);
 
 const selectedCategory = ref(null);
 const highlighterPopup = ref(null);

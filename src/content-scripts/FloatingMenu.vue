@@ -71,6 +71,7 @@
         <div v-show="focus" class="uhighlight-focus-options">
           <ColorChoice
             :colors="colors"
+            :darkMode="darkMode"
             :select="true"
             @colorClicked="(index) => $emit('chooseColor', index)"
           >

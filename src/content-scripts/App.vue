@@ -38,7 +38,8 @@
 
   <HighlighterPopup
     :position="highlighterPopupPosition"
-    :colors="currentColors"
+    :colors="colors"
+    :darkMode="darkMode"
     :categories="categories"
     @addHighlight="highlightSelection"
     @addCategory="addCategory"
@@ -46,7 +47,7 @@
   <FloatingMenu
     v-model:focus="focusMode"
     :categories="categories"
-    :colors="currentColors"
+    :colors="colors"
     :darkMode="darkMode"
     :hidden="hideFloatingMenu"
     :usedCategories="usedCategories"
@@ -78,7 +79,6 @@ const focusMode = ref(false);
 const usedCategories = ref([]);
 let focusModeColorIndex = 0;
 let focusModeCategory = "";
-let currentColors = [];
 const darkMode = ref(false);
 const editors = {};
 
@@ -114,17 +114,14 @@ onMounted(() => {
 });
 
 watch(darkMode, (newDarkModeValue) => {
-  if (newDarkModeValue) {
+  if (newDarkModeValue)
     document.documentElement.className = "uhighlight-dark-mode";
-    currentColors = colors.value.map((c) => c.dark);
-  } else {
-    document.documentElement.className = "uhighlight-light-mode";
-    currentColors = colors.value.map((c) => c.light);
-  }
+  else document.documentElement.className = "uhighlight-light-mode";
   updateHighlightColors();
 });
 
 watch(highlights, () => {
+  console.log(getPage.value);
   usedCategories.value = [
     ...new Set(
       Object.values(highlights.value)
@@ -141,9 +138,6 @@ async function loadData(addHighlights) {
     darkMode.value = userPrefersDarkMode();
   } else {
     darkMode.value = page.darkMode ?? userPrefersDarkMode();
-    currentColors = colors.value.map((c) =>
-      darkMode.value ? c.dark : c.light
-    );
     if (typeof addHighlights === "boolean" && addHighlights) {
       let error = false;
       for (const [id, highlight] of Object.entries(highlights.value)) {
@@ -227,14 +221,16 @@ function updateVisibleCategories(activeCategories) {
 }
 
 function updateHighlightColors() {
-  currentColors.forEach((color, index) => {
-    const highlightElements = document.getElementsByClassName(
-      `uhighlight-color-${index}`
-    );
-    for (let highlight of highlightElements) {
-      highlight.style.backgroundColor = color;
-    }
-  });
+  colors.value
+    .map((c) => (darkMode.value ? c.dark : c.light))
+    .forEach((color, index) => {
+      const highlightElements = document.getElementsByClassName(
+        `uhighlight-color-${index}`
+      );
+      for (let highlight of highlightElements) {
+        highlight.style.backgroundColor = color;
+      }
+    });
 }
 
 function setHighlighterPopupPosition() {
@@ -262,7 +258,9 @@ function highlightRange(range, id, categoryId, colorIndex, notes) {
   const clone = highlightTemplate.value.cloneNode(true);
   clone.classList.add("uhighlight-" + categoryId);
   clone.classList.add("uhighlight-color-" + colorIndex);
-  clone.style.backgroundColor = currentColors[colorIndex];
+  clone.style.backgroundColor = darkMode.value
+    ? colors.value[colorIndex].dark
+    : colors.value[colorIndex].light;
   clone.style.display = "inline";
   clone
     .getElementsByClassName("uhighlight-delete-btn")[0]
